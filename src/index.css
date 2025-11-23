@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Bybit Investment Platform Design System */
+
+@layer base {
+  :root {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+ 
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --primary: 34 98% 53%; /* bybit-gold */
+    --primary-foreground: 0 0% 10%;
+ 
+    --secondary: 0 0% 16.5%; /* bybit-secondary */
+    --secondary-foreground: 0 0% 98%;
+ 
+    --muted: 0 0% 63.9%; /* bybit-text-muted */
+    --muted-foreground: 0 0% 63.9%;
+ 
+    --accent: 34 98% 53%; /* bybit-gold */
+    --accent-foreground: 0 0% 10%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%; /* bybit-border */
+    --input: 0 0% 20%;
+    --ring: 34 98% 53%;
+
+    --radius: 0.5rem;
+
+    --success: 120 60% 50%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 34 98% 53%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 34 98% 53%;
+
+    /* Bybit specific colors */
+    --bybit-black: 0 0% 3.9%;
+    --bybit-card: 0 0% 10%;
+    --bybit-border: 0 0% 20%;
+    --bybit-gold: 34 98% 53%;
+    --bybit-gold-hover: 34 90% 48%;
+    --bybit-secondary: 0 0% 16.5%;
+    --bybit-card-hover: 0 0% 17.5%;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+ 
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --primary: 34 98% 53%;
+    --primary-foreground: 0 0% 10%;
+ 
+    --secondary: 0 0% 16.5%;
+    --secondary-foreground: 0 0% 98%;
+ 
+    --muted: 0 0% 63.9%;
+    --muted-foreground: 0 0% 63.9%;
+ 
+    --accent: 34 98% 53%;
+    --accent-foreground: 0 0% 10%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 34 98% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+}
+
+@layer utilities {
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--bybit-gold-hover)));
+  }
+
+  .shadow-gold {
+    box-shadow: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+  }
+
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
