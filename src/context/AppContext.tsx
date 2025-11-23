@@ -128,8 +128,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       if (error) throw error;
 
       if (data) {
-        setProfile(data as Profile);
-        setIsAdmin(data.role === 'admin');
+        // Check role from user_roles table (secure)
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', currentSession.user.id)
+          .single();
+
+        setProfile({ ...data, role: roleData?.role || 'user' } as Profile);
+        setIsAdmin(roleData?.role === 'admin');
       }
     } catch (error) {
       console.error('Error fetching profile:', error);

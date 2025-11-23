@@ -3,16 +3,64 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { features, testimonials, faqs } from '@/lib/data';
-import { Play, Star, ChevronDown, TrendingUp, Shield, Zap } from 'lucide-react';
+import { Play, Star, ChevronDown, TrendingUp, Shield, Zap, X } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import bybitLogo from '@/assets/bybit-logo.jpg';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Landing = () => {
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: adminEmail,
+        password: adminPassword,
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
+        // Check if user has admin role
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.session.user.id)
+          .eq('role', 'admin')
+          .single();
+
+        if (roleData) {
+          toast.success('Login de administrador realizado!');
+          navigate('/admin');
+        } else {
+          await supabase.auth.signOut();
+          throw new Error('Acesso negado. Você não tem permissões de administrador.');
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Credenciais inválidas');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -270,22 +318,66 @@ const Landing = () => {
         </div>
       </footer>
 
-      {/* Floating Admin Button */}
-      <Link
-        to="/admin"
-        className="fixed bottom-8 right-8 z-50 group"
+      {/* Floating Admin Portal Button */}
+      <button
+        onClick={() => setIsAdminOpen(true)}
+        className="fixed bottom-4 left-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl transition-transform hover:scale-110"
+        title="Admin Portal"
       >
-        <div className="relative w-24 h-28 flex items-center justify-center transition-transform hover:scale-110">
-          <div 
-            className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-amber-600 shadow-gold"
-            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
-          />
-          <div className="relative z-10 flex flex-col items-center justify-center text-center px-2">
-            <span className="text-white font-bold text-xs tracking-wider">BYBIT</span>
-            <Shield className="h-5 w-5 text-white/90 mt-1" />
-          </div>
-        </div>
-      </Link>
+        <Shield className="w-10 h-10" />
+      </button>
+
+      {/* Admin Login Dialog */}
+      <Dialog open={isAdminOpen} onOpenChange={setIsAdminOpen}>
+        <DialogContent className="sm:max-w-md">
+          <button
+            onClick={() => setIsAdminOpen(false)}
+            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <DialogHeader>
+            <div className="flex justify-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <Shield className="h-6 w-6 text-blue-500" />
+              </div>
+            </div>
+            <DialogTitle className="text-center text-xl">Admin Access</DialogTitle>
+            <DialogDescription className="text-center">
+              Restricted area for system management.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAdminLogin} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="admin-email">Admin Email</Label>
+              <Input
+                id="admin-email"
+                type="email"
+                placeholder="admin@system.com"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                className="bg-background"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-password">Access Key</Label>
+              <Input
+                id="admin-password"
+                type="password"
+                placeholder="••••••••"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                className="bg-background"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Verifying...' : 'Enter Dashboard'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
