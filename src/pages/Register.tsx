@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useApp } from '@/context/AppContext';
 import { TrendingUp, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +19,6 @@ const Register = () => {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
-  const { register } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -44,29 +44,32 @@ const Register = () => {
     }
 
     try {
-      const { confirmPassword, password, ...userData } = formData;
-      const success = await register(userData, password);
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+            phone: formData.phone,
+            cpf: formData.cpf,
+          },
+        },
+      });
+
+      if (error) throw error;
       
-      if (success) {
-        toast({
-          title: 'Cadastro enviado!',
-          description: 'Sua conta será analisada e você receberá um email de confirmação.',
-        });
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro no cadastro',
-          description: 'Email já cadastrado.',
-        });
-      }
-    } catch (error) {
+      toast({
+        title: 'Cadastro enviado!',
+        description: 'Sua conta será analisada e você receberá um email de confirmação.',
+      });
+      setTimeout(() => {
+        navigate('/pending-approval');
+      }, 2000);
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: 'Ocorreu um erro ao criar sua conta.',
+        description: error.message || 'Ocorreu um erro ao criar sua conta.',
       });
     } finally {
       setLoading(false);

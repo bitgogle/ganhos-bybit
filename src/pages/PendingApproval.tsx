@@ -6,25 +6,25 @@ import { Button } from '@/components/ui/button';
 import { Clock, LogOut, TrendingUp } from 'lucide-react';
 
 const PendingApproval = () => {
-  const { currentUser, logout } = useApp();
+  const { profile, logout } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!profile) {
       navigate('/login');
-    } else if (currentUser.status === 'active') {
+    } else if (profile.status === 'active') {
       navigate('/dashboard');
-    } else if (currentUser.status === 'rejected') {
+    } else if (profile.status === 'rejected') {
       navigate('/rejected');
     }
-  }, [currentUser, navigate]);
+  }, [profile, navigate]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
-  if (!currentUser) return null;
+  if (!profile) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-primary/5 to-background">
@@ -43,7 +43,7 @@ const PendingApproval = () => {
         <CardContent className="space-y-6">
           <div className="space-y-3 text-center">
             <p className="text-muted-foreground">
-              Olá, <span className="font-medium text-foreground">{currentUser.name}</span>!
+              Olá, <span className="font-medium text-foreground">{profile.name}</span>!
             </p>
             <p className="text-sm text-muted-foreground">
               Seu cadastro foi recebido com sucesso e está em análise. 

@@ -1,18 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp } from 'lucide-react';
-import { UserManagement } from '@/components/admin/UserManagement';
-import { TransactionManagement } from '@/components/admin/TransactionManagement';
-import { SettingsManagement } from '@/components/admin/SettingsManagement';
-import { AdminStats } from '@/components/admin/AdminStats';
-import { Badge } from '@/components/ui/badge';
+import { TrendingUp, LogOut, Badge } from 'lucide-react';
+import { Profile, Transaction } from '@/context/AppContext';
 
 const Admin = () => {
-  const { isAdmin, logout, users, transactions } = useApp();
+  const { isAdmin, logout } = useApp();
   const navigate = useNavigate();
+  const [users, setUsers] = useState<Profile[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -20,25 +19,33 @@ const Admin = () => {
     }
   }, [isAdmin, navigate]);
 
-  const pendingUsers = users.filter(u => u.status === 'pending').length;
-  const pendingTransactions = transactions.filter(t => t.status === 'pending').length;
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: profilesData } = await supabase.from('profiles').select('*');
+      const { data: txData } = await supabase.from('transactions').select('*');
+      setUsers(profilesData || []);
+      setTransactions(txData || []);
+    };
+    if (isAdmin) fetchData();
+  }, [isAdmin]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
   if (!isAdmin) return null;
 
+  const pendingUsers = users.filter(u => u.status === 'pending').length;
+  const pendingTransactions = transactions.filter(t => t.status === 'pending').length;
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card/50">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Ganhos Bybit</span>
-            <Badge variant="secondary" className="ml-2">Admin</Badge>
+            <span className="text-xl font-bold">Ganhos Bybit - Admin</span>
           </div>
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut className="h-4 w-4 mr-2" />
@@ -48,42 +55,55 @@ const Admin = () => {
       </header>
 
       <main className="container py-8 px-4">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage users, transactions, and platform settings</p>
+        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+        
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Total de Usuários</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{users.length}</div>
+              <p className="text-sm text-muted-foreground">
+                {pendingUsers} aguardando aprovação
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Transações</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{transactions.length}</div>
+              <p className="text-sm text-muted-foreground">
+                {pendingTransactions} pendentes
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Usuários Ativos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {users.filter(u => u.status === 'active').length}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <AdminStats />
-
-        <Tabs defaultValue="users" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="users">
-              User Management
-              {pendingUsers > 0 && (
-                <Badge variant="destructive" className="ml-2">{pendingUsers}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="transactions">
-              Transactions
-              {pendingTransactions > 0 && (
-                <Badge variant="destructive" className="ml-2">{pendingTransactions}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="settings">Platform Settings</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="users">
-            <UserManagement />
-          </TabsContent>
-
-          <TabsContent value="transactions">
-            <TransactionManagement />
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <SettingsManagement />
-          </TabsContent>
-        </Tabs>
+        <Card>
+          <CardHeader>
+            <CardTitle>Gerenciamento completo em desenvolvimento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              Use a interface do Cloud para gerenciar usuários e transações por enquanto.
+            </p>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
