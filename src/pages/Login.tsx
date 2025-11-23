@@ -7,12 +7,13 @@ import { Label } from '@/components/ui/label';
 import { useApp } from '@/context/AppContext';
 import { TrendingUp, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, isAdmin } = useApp();
+  const { refreshProfile } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -21,35 +22,29 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        // Check if admin or regular user after login
-        const adminCheck = email === 'admin@bybit.com';
-        
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
+        await refreshProfile();
         toast({
           title: 'Login realizado com sucesso!',
           description: 'Redirecionando...',
         });
         
         setTimeout(() => {
-          if (adminCheck) {
-            navigate('/admin');
-          } else {
-            navigate('/dashboard');
-          }
+          navigate('/dashboard');
         }, 500);
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro no login',
-          description: 'Email ou senha incorretos.',
-        });
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Erro',
-        description: 'Ocorreu um erro ao fazer login.',
+        title: 'Erro no login',
+        description: error.message || 'Email ou senha incorretos.',
       });
     } finally {
       setLoading(false);
