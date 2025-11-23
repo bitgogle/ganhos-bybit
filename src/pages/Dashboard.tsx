@@ -29,7 +29,7 @@ const Dashboard = () => {
         .select('*')
         .eq('user_id', profile.id)
         .order('created_at', { ascending: false });
-      setTransactions(data || []);
+      setTransactions((data || []) as Transaction[]);
     };
     fetchTransactions();
   }, [profile]);

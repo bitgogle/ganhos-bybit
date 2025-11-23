@@ -23,8 +23,8 @@ const Admin = () => {
     const fetchData = async () => {
       const { data: profilesData } = await supabase.from('profiles').select('*');
       const { data: txData } = await supabase.from('transactions').select('*');
-      setUsers(profilesData || []);
-      setTransactions(txData || []);
+      setUsers((profilesData || []) as Profile[]);
+      setTransactions((txData || []) as Transaction[]);
     };
     if (isAdmin) fetchData();
   }, [isAdmin]);
