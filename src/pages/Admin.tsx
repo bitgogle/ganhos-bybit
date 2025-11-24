@@ -31,7 +31,11 @@ import {
   UserCheck,
   UserX,
   Activity,
+  Shield,
+  FileText,
 } from 'lucide-react';
+import { UserRestrictionManager } from '@/components/admin/UserRestrictionManager';
+import { WithdrawalFeeSettings } from '@/components/admin/WithdrawalFeeSettings';
 import { Profile, Transaction, SystemSettings } from '@/context/AppContext';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 import { toast } from 'sonner';
@@ -425,6 +429,7 @@ const Admin = () => {
                       <TableHead>Email</TableHead>
                       <TableHead>CPF</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Restrição</TableHead>
                       <TableHead>Saldo</TableHead>
                       <TableHead>Cadastro</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -433,7 +438,7 @@ const Admin = () => {
                   <TableBody>
                     {users.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                           Nenhum usuário encontrado
                         </TableCell>
                       </TableRow>
@@ -453,6 +458,16 @@ const Admin = () => {
                                user.status === 'pending' ? 'Pendente' :
                                'Rejeitado'}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {user.restricted ? (
+                              <Badge variant="destructive">
+                                <Shield className="h-3 w-3 mr-1" />
+                                Restrito
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline">Normal</Badge>
+                            )}
                           </TableCell>
                           <TableCell>{formatCurrency(user.available_balance)}</TableCell>
                           <TableCell className="text-sm text-muted-foreground">
@@ -486,6 +501,9 @@ const Admin = () => {
                                     <UserX className="h-4 w-4 text-destructive" />
                                   </Button>
                                 </>
+                              )}
+                              {user.status === 'active' && (
+                                <UserRestrictionManager user={user} onUpdate={fetchData} />
                               )}
                             </div>
                           </TableCell>
@@ -608,7 +626,7 @@ const Admin = () => {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings">
+          <TabsContent value="settings" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Configurações da Plataforma</CardTitle>
@@ -663,6 +681,8 @@ const Admin = () => {
                 </form>
               </CardContent>
             </Card>
+
+            <WithdrawalFeeSettings />
           </TabsContent>
         </Tabs>
       </main>
