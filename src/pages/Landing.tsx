@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { features, testimonials, faqs } from '@/lib/data';
+import { features, testimonials, faqs, showcaseImages } from '@/lib/data';
 import { Play, Star, ChevronDown, TrendingUp, Shield, Zap, X } from 'lucide-react';
 import {
   Accordion,
@@ -13,7 +13,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import bybitLogo from '@/assets/bybit-logo.jpg';
+import bybitLogo from '@/assets/bybit-logo-circular.png';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -67,9 +67,8 @@ const Landing = () => {
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-12 flex items-center justify-center">
-              <div className="absolute inset-0 bg-primary/20" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
-              <img src={bybitLogo} alt="Bybit Logo" className="w-8 h-8 object-contain relative z-10" />
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <img src={bybitLogo} alt="Bybit Logo" className="w-10 h-10 object-contain rounded-full" />
             </div>
             <span className="text-xl font-bold">Ganhos Bybit</span>
           </div>
@@ -106,7 +105,7 @@ const Landing = () => {
             <div className="flex flex-col items-center text-center space-y-8">
               <Badge variant="secondary" className="px-4 py-2">
                 <Zap className="mr-2 h-4 w-4" />
-                Lucros Distribuídos a Cada 6 Horas
+                Lucros Distribuídos a Cada 3 Horas
               </Badge>
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl max-w-4xl">
                 Alcance Seus <span className="text-primary">Objetivos Financeiros</span> Conosco
@@ -184,11 +183,13 @@ const Landing = () => {
                 Planos flexíveis para todos os perfis de investidores
               </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-5">
               {[
-                { name: 'Iniciante', min: 100, max: 999, daily: 1.5, color: 'secondary' },
-                { name: 'Profissional', min: 1000, max: 4999, daily: 2.0, color: 'primary', featured: true },
-                { name: 'Premium', min: 5000, max: 999999, daily: 2.5, color: 'primary' }
+                { name: 'Básico', amount: 200, profit: 40 },
+                { name: 'Intermediário', amount: 300, profit: 60 },
+                { name: 'Profissional', amount: 500, profit: 100, featured: true },
+                { name: 'Avançado', amount: 700, profit: 140 },
+                { name: 'Premium', amount: 1000, profit: 200 }
               ].map((plan, index) => (
                 <Card key={index} className={`relative ${plan.featured ? 'border-primary shadow-gold scale-105' : 'border-border'}`}>
                   {plan.featured && (
@@ -199,17 +200,19 @@ const Landing = () => {
                   <CardHeader>
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold text-primary">{plan.daily}%</span>
-                      <span className="text-muted-foreground ml-2">/ dia</span>
+                      <span className="text-4xl font-bold text-primary">R$ {plan.amount}</span>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        Investimento: R$ {plan.min.toLocaleString('pt-BR')} - R$ {plan.max.toLocaleString('pt-BR')}
+                        Investimento: R$ {plan.amount.toLocaleString('pt-BR')}
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        Retorno mensal: até {(plan.daily * 30).toFixed(1)}%
+                      <p className="text-sm font-semibold text-primary">
+                        Lucro: R$ {plan.profit.toLocaleString('pt-BR')} a cada 3 horas
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Escolha duração: 1 ou 2 dias
                       </p>
                     </div>
                     <Button className="w-full" variant={plan.featured ? 'default' : 'outline'} asChild>
@@ -218,6 +221,44 @@ const Landing = () => {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Showcase Images */}
+        <section className="w-full py-16 md:py-24">
+          <div className="container px-4 md:px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                Excelência e Inovação Bybit
+              </h2>
+              <p className="mt-4 text-muted-foreground md:text-lg max-w-2xl mx-auto">
+                Descubra a plataforma que está transformando o mercado de criptomoedas globalmente
+              </p>
+            </div>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {showcaseImages.map((image, index) => {
+                const imageSrc = require(`@/assets/${image.src}`);
+                return (
+                  <Card key={index} className="border-border overflow-hidden hover:border-primary transition-all hover:shadow-gold">
+                    <div className="aspect-video w-full overflow-hidden bg-card">
+                      <img 
+                        src={imageSrc} 
+                        alt={image.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <CardHeader>
+                      <CardTitle className="text-lg">{image.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {image.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </section>
