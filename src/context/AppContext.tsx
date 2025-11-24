@@ -17,6 +17,7 @@ export interface Profile {
   invested_balance: number;
   profit_balance: number;
   role: 'user' | 'admin';
+  restricted?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -54,6 +55,25 @@ export interface SystemSettings {
   pix_key: string;
   bybit_uid: string;
   usdt_address: string;
+  withdrawal_fee_enabled?: boolean;
+  withdrawal_fee_amount?: number;
+  withdrawal_fee_mode?: 'deduct' | 'deposit';
+}
+
+export interface FeeRequest {
+  id: string;
+  user_id: string;
+  related_withdrawal_id?: string;
+  amount: number;
+  proof_url?: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'expired';
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+  profiles?: {
+    name: string;
+    email: string;
+  };
 }
 
 interface AppContextType {
