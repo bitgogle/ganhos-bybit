@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { Transaction, SystemSettings } from '@/context/AppContext';
+import { WithdrawalFeeDialog } from '@/components/withdrawal/WithdrawalFeeDialog';
 import { toast } from 'sonner';
 
 interface Notification {
@@ -61,6 +62,11 @@ const Dashboard = () => {
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawMethod, setWithdrawMethod] = useState<'pix' | 'bybit' | 'usdt'>('pix');
+  
+  // Withdrawal fee dialog state
+  const [feeDialogOpen, setFeeDialogOpen] = useState(false);
+  const [pendingWithdrawalId, setPendingWithdrawalId] = useState<string>('');
+  const [feeAmount, setFeeAmount] = useState(0);
 
   // Investment dialog state
   const [investOpen, setInvestOpen] = useState(false);
@@ -162,6 +168,12 @@ const Dashboard = () => {
       return;
     }
 
+    // Check for restrictions
+    if (profile.restricted) {
+      toast.error('Sua conta está restrita. Entre em contato com o suporte.');
+      return;
+    }
+
     if (!proofFile) {
       toast.error('Por favor, envie o comprovante de pagamento.');
       return;
@@ -216,6 +228,12 @@ const Dashboard = () => {
       return;
     }
 
+    // Check for restrictions
+    if (profile.restricted) {
+      toast.error('Sua conta está restrita. Entre em contato com o suporte.');
+      return;
+    }
+
     if (amount > profile.available_balance) {
       toast.error('Saldo insuficiente.');
       return;
@@ -234,8 +252,33 @@ const Dashboard = () => {
     setLoading(true);
 
     try {
-      // Optimistic update - deduct balance immediately
-      const newBalance = profile.available_balance - amount;
+      // Fetch system settings to check for withdrawal fee
+      const { data: settings } = await supabase
+        .from('system_settings')
+        .select('*')
+        .maybeSingle();
+
+      const feeEnabled = settings?.withdrawal_fee_enabled || false;
+      const feeMode = settings?.withdrawal_fee_mode || 'deduct';
+      const fee = settings?.withdrawal_fee_amount || 0;
+
+      let actualAmount = amount;
+      
+      if (feeEnabled && feeMode === 'deduct') {
+        // Deduct fee from balance
+        actualAmount = amount + fee;
+        
+        if (actualAmount > profile.available_balance) {
+          toast.error(`Saldo insuficiente. Você precisa de ${formatCurrency(actualAmount)} (incluindo taxa de ${formatCurrency(fee)})`);
+          return;
+        }
+      }
+
+      // Deduct balance
+      const newBalance = feeEnabled && feeMode === 'deduct' 
+        ? profile.available_balance - actualAmount 
+        : profile.available_balance - amount;
+        
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ available_balance: newBalance })
@@ -245,13 +288,17 @@ const Dashboard = () => {
 
       const methodLabel = withdrawMethod === 'pix' ? 'PIX' : withdrawMethod === 'bybit' ? 'Bybit UID' : 'USDT (TRC20)';
 
-      const { error: txError } = await supabase.from('transactions').insert({
-        user_id: profile.id,
-        amount,
-        type: 'withdrawal',
-        status: 'pending',
-        reference: `Saque para ${methodLabel}: ${destination}`
-      });
+      const { data: txData, error: txError } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: profile.id,
+          amount,
+          type: 'withdrawal',
+          status: 'pending',
+          reference: `Saque para ${methodLabel}: ${destination}`
+        })
+        .select()
+        .single();
 
       if (txError) {
         // Rollback balance update
@@ -264,6 +311,13 @@ const Dashboard = () => {
       setWithdrawOpen(false);
       await refreshProfile();
       fetchTransactions();
+
+      // If fee is enabled and mode is deposit, show fee dialog
+      if (feeEnabled && feeMode === 'deposit' && txData) {
+        setPendingWithdrawalId(txData.id);
+        setFeeAmount(fee);
+        setFeeDialogOpen(true);
+      }
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -1005,6 +1059,17 @@ const Dashboard = () => {
             </div>
           </DialogContent>
         </Dialog>
+      )}
+
+      {/* Withdrawal Fee Dialog */}
+      {profile && (
+        <WithdrawalFeeDialog
+          open={feeDialogOpen}
+          onOpenChange={setFeeDialogOpen}
+          withdrawalId={pendingWithdrawalId}
+          feeAmount={feeAmount}
+          userId={profile.id}
+        />
       )}
     </div>
   );
