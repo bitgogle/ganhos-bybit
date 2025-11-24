@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      fee_requests: {
+        Row: {
+          amount: number
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          proof_url: string | null
+          related_withdrawal_id: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          proof_url?: string | null
+          related_withdrawal_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          proof_url?: string | null
+          related_withdrawal_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_requests_related_withdrawal_id_fkey"
+            columns: ["related_withdrawal_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -65,6 +109,7 @@ export type Database = {
           phone: string | null
           pix_key: string | null
           profit_balance: number | null
+          restricted: boolean | null
           role: string
           status: string
           updated_at: string | null
@@ -82,6 +127,7 @@ export type Database = {
           phone?: string | null
           pix_key?: string | null
           profit_balance?: number | null
+          restricted?: boolean | null
           role?: string
           status?: string
           updated_at?: string | null
@@ -99,6 +145,7 @@ export type Database = {
           phone?: string | null
           pix_key?: string | null
           profit_balance?: number | null
+          restricted?: boolean | null
           role?: string
           status?: string
           updated_at?: string | null
@@ -114,6 +161,9 @@ export type Database = {
           pix_key: string | null
           updated_at: string | null
           usdt_address: string | null
+          withdrawal_fee_amount: number | null
+          withdrawal_fee_enabled: boolean | null
+          withdrawal_fee_mode: string | null
         }
         Insert: {
           bybit_uid?: string | null
@@ -122,6 +172,9 @@ export type Database = {
           pix_key?: string | null
           updated_at?: string | null
           usdt_address?: string | null
+          withdrawal_fee_amount?: number | null
+          withdrawal_fee_enabled?: boolean | null
+          withdrawal_fee_mode?: string | null
         }
         Update: {
           bybit_uid?: string | null
@@ -130,6 +183,9 @@ export type Database = {
           pix_key?: string | null
           updated_at?: string | null
           usdt_address?: string | null
+          withdrawal_fee_amount?: number | null
+          withdrawal_fee_enabled?: boolean | null
+          withdrawal_fee_mode?: string | null
         }
         Relationships: []
       }

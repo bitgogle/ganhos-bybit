@@ -29,6 +29,26 @@ const Login = () => {
 
       if (error) throw error;
 
+      // Check if user is restricted
+      if (data.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('restricted')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileData?.restricted) {
+          await supabase.auth.signOut();
+          toast({
+            variant: 'destructive',
+            title: 'Acesso Negado',
+            description: 'Sua conta foi restrita. Entre em contato com o suporte.',
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
       if (data.session) {
         await refreshProfile();
         toast({
