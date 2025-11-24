@@ -88,48 +88,26 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const investmentPlans: InvestmentPlan[] = [
-  {
-    id: 'bronze',
-    name: 'Plano Bronze',
-    amount: 100,
-    daily_return_rate: 0.015,
-    duration_days: 30,
-    description: 'Ideal para quem está começando',
-    theme: 'amber',
-    recommended: false
-  },
-  {
-    id: 'silver',
-    name: 'Plano Prata',
-    amount: 500,
-    daily_return_rate: 0.020,
-    duration_days: 45,
-    description: 'Para investidores intermediários',
-    theme: 'slate',
-    recommended: true
-  },
-  {
-    id: 'gold',
-    name: 'Plano Ouro',
-    amount: 1000,
-    daily_return_rate: 0.025,
-    duration_days: 60,
-    description: 'Para investidores experientes',
-    theme: 'yellow',
-    recommended: false
-  },
-  {
-    id: 'platinum',
-    name: 'Plano Platina',
-    amount: 5000,
-    daily_return_rate: 0.032,
-    duration_days: 90,
-    description: 'Máximo retorno para grandes investidores',
-    theme: 'indigo',
-    recommended: false
+// Generate investment plans from R$ 200 to R$ 5,000 in R$ 100 increments
+// Profit: R$ 20 for every R$ 100 invested (distributed every 3 hours)
+export const generateInvestmentPlans = (): InvestmentPlan[] => {
+  const plans: InvestmentPlan[] = [];
+  for (let amount = 200; amount <= 5000; amount += 100) {
+    plans.push({
+      id: `plan-${amount}`,
+      name: `Plano R$ ${amount}`,
+      amount,
+      daily_return_rate: 0, // Not used anymore, profit is R$ 20 per R$ 100 every 3 hours
+      duration_days: 1, // User selects 1-7 days
+      description: `Investimento de ${amount} reais`,
+      theme: amount === 500 ? 'slate' : 'amber',
+      recommended: amount === 500
+    });
   }
-];
+  return plans;
+};
+
+export const investmentPlans: InvestmentPlan[] = generateInvestmentPlans();
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);

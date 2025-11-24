@@ -233,7 +233,7 @@ const Landing = () => {
                         Lucro: R$ {plan.profit.toLocaleString('pt-BR')} a cada 3 horas
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Escolha duração: 1 ou 2 dias
+                        Escolha duração: 1 a 7 dias
                       </p>
                     </div>
                     <Button className="w-full" variant={plan.featured ? 'default' : 'outline'} asChild>

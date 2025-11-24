@@ -57,7 +57,7 @@ export const testimonials = [
 export const faqs = [
   {
     question: 'Como funciona o sistema de investimento?',
-    answer: 'Você deposita um valor mínimo, escolhe um plano de investimento e duração (1 ou 2 dias). Nosso sistema automatizado opera 24/7 gerando lucros que são distribuídos a cada 3 horas diretamente na sua conta.'
+    answer: 'Você deposita um valor mínimo, escolhe um plano de investimento e duração (de 1 a 7 dias). Nosso sistema automatizado opera 24/7 gerando lucros que são distribuídos a cada 3 horas diretamente na sua conta.'
   },
   {
     question: 'Qual o valor mínimo para começar?',
@@ -65,7 +65,7 @@ export const faqs = [
   },
   {
     question: 'Como funciona o cálculo de lucros?',
-    answer: 'O lucro é calculado na proporção de R$ 20,00 para cada R$ 100,00 investidos. Por exemplo: R$ 200,00 rende R$ 40,00 a cada 3 horas, R$ 300,00 rende R$ 60,00 a cada 3 horas, e assim por diante.'
+    answer: 'O lucro é calculado na proporção de R$ 20,00 para cada R$ 100,00 investidos, distribuídos a cada 3 horas. Por exemplo: R$ 200,00 rende R$ 40,00 a cada 3 horas, R$ 300,00 rende R$ 60,00 a cada 3 horas, e assim por diante. Você escolhe a duração do investimento entre 1 e 7 dias.'
   },
   {
     question: 'Como faço para sacar meus lucros?',
