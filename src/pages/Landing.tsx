@@ -14,6 +14,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import bybitLogo from '@/assets/bybit-logo-circular.png';
+import bybitCeo from '@/assets/bybit-ceo.jpeg';
+import bybitStandard from '@/assets/bybit-standard.jpeg';
+import bybitPlatform from '@/assets/bybit-platform.jpeg';
+import bybitTradfi from '@/assets/bybit-tradfi.jpeg';
+import bybitFeatureUpgrade from '@/assets/bybit-feature-upgrade.jpeg';
+import bybitOptions from '@/assets/bybit-options.jpeg';
+import bybitVsBinance from '@/assets/bybit-vs-binance.jpeg';
+import bybitPay from '@/assets/bybit-pay.jpeg';
+import bybitCard from '@/assets/bybit-card.jpeg';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +34,18 @@ const Landing = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const imageMap: Record<string, string> = {
+    'bybit-ceo.jpeg': bybitCeo,
+    'bybit-standard.jpeg': bybitStandard,
+    'bybit-platform.jpeg': bybitPlatform,
+    'bybit-tradfi.jpeg': bybitTradfi,
+    'bybit-feature-upgrade.jpeg': bybitFeatureUpgrade,
+    'bybit-options.jpeg': bybitOptions,
+    'bybit-vs-binance.jpeg': bybitVsBinance,
+    'bybit-pay.jpeg': bybitPay,
+    'bybit-card.jpeg': bybitCard,
+  };
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -237,28 +258,25 @@ const Landing = () => {
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {showcaseImages.map((image, index) => {
-                const imageSrc = require(`@/assets/${image.src}`);
-                return (
-                  <Card key={index} className="border-border overflow-hidden hover:border-primary transition-all hover:shadow-gold">
-                    <div className="aspect-video w-full overflow-hidden bg-card">
-                      <img 
-                        src={imageSrc} 
-                        alt={image.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+              {showcaseImages.map((image, index) => (
+                <Card key={index} className="border-border overflow-hidden hover:border-primary transition-all hover:shadow-gold">
+                  <div className="aspect-video w-full overflow-hidden bg-card">
+                    <img 
+                      src={imageMap[image.src]} 
+                      alt={image.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                     <CardHeader>
                       <CardTitle className="text-lg">{image.title}</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {image.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {image.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
