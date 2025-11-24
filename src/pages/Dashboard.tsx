@@ -71,6 +71,7 @@ const Dashboard = () => {
   // Investment dialog state
   const [investOpen, setInvestOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<typeof investmentPlans[0] | null>(null);
+  const [investmentDuration, setInvestmentDuration] = useState<number>(1);
 
   // Notifications
   const [showNotifications, setShowNotifications] = useState(false);
@@ -327,6 +328,7 @@ const Dashboard = () => {
 
   const openInvestModal = (plan: typeof investmentPlans[0]) => {
     setSelectedPlan(plan);
+    setInvestmentDuration(1); // Reset to 1 day
     setInvestOpen(true);
   };
 
@@ -359,7 +361,7 @@ const Dashboard = () => {
         amount: selectedPlan.amount,
         type: 'investment',
         status: 'completed',
-        reference: `Investimento: ${selectedPlan.name} | ${selectedPlan.duration_days} dias`
+        reference: `Investimento: ${selectedPlan.name} | ${investmentDuration} ${investmentDuration === 1 ? 'dia' : 'dias'}`
       });
 
       if (txError) {
@@ -688,51 +690,130 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Oportunidades de Investimento
+              Fazer um Investimento
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Planos com retorno garantido</p>
+            <p className="text-sm text-muted-foreground">
+              Escolha o valor (R$ 200 a R$ 5.000 em incrementos de R$ 100) e duração (1 a 7 dias)
+            </p>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {investmentPlans.map((plan) => (
-                <Card key={plan.id} className={`border ${getPlanStyles(plan.theme)} transition-all`}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg">{plan.name}</CardTitle>
-                      {plan.recommended && (
-                        <Badge className="ml-2">
-                          <Star className="h-3 w-3 mr-1 fill-current" />
-                          Recomendado
-                        </Badge>
-                      )}
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Quick access featured plans */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-muted-foreground">Planos em Destaque</h3>
+                <div className="grid gap-3">
+                  {[200, 300, 500, 700, 1000].map((amount) => {
+                    const plan = investmentPlans.find(p => p.amount === amount);
+                    if (!plan) return null;
+                    const profitPer3Hours = (amount / 100) * 20;
+                    return (
+                      <Card 
+                        key={amount} 
+                        className={`border cursor-pointer transition-all hover:border-primary hover:shadow-md ${
+                          amount === 500 ? 'border-primary bg-primary/5' : 'border-border'
+                        }`}
+                        onClick={() => openInvestModal(plan)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg font-bold">{formatCurrency(amount)}</span>
+                                {amount === 500 && (
+                                  <Badge className="text-xs">
+                                    <Star className="h-2.5 w-2.5 mr-1 fill-current" />
+                                    Popular
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-success mt-1">
+                                {formatCurrency(profitPer3Hours)} a cada 3h
+                              </p>
+                            </div>
+                            <Button 
+                              size="sm"
+                              disabled={profile.available_balance < amount}
+                            >
+                              Investir
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Custom amount selector */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-muted-foreground">Valor Personalizado</h3>
+                <Card className="border-border">
+                  <CardContent className="p-6 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="custom-amount">Valor do Investimento</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                          <Input
+                            id="custom-amount"
+                            type="number"
+                            min="200"
+                            max="5000"
+                            step="100"
+                            placeholder="200"
+                            className="pl-10"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const amount = parseInt((e.target as HTMLInputElement).value);
+                                if (amount >= 200 && amount <= 5000 && amount % 100 === 0) {
+                                  const plan = investmentPlans.find(p => p.amount === amount);
+                                  if (plan) openInvestModal(plan);
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+                        <Button
+                          onClick={() => {
+                            const input = document.getElementById('custom-amount') as HTMLInputElement;
+                            const amount = parseInt(input.value);
+                            if (amount >= 200 && amount <= 5000 && amount % 100 === 0) {
+                              const plan = investmentPlans.find(p => p.amount === amount);
+                              if (plan) {
+                                openInvestModal(plan);
+                                input.value = '';
+                              } else {
+                                toast.error('Plano não encontrado');
+                              }
+                            } else {
+                              toast.error('Valor deve ser entre R$ 200 e R$ 5.000 em incrementos de R$ 100');
+                            }
+                          }}
+                        >
+                          Investir
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Valores de R$ 200 a R$ 5.000 em incrementos de R$ 100
+                      </p>
                     </div>
-                    <div className="text-3xl font-bold mt-2">
-                      {formatCurrency(plan.amount)}
+                    <div className="pt-4 border-t space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Percent className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-muted-foreground">R$ 20 de lucro para cada R$ 100 investidos</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-muted-foreground">Distribuições a cada 3 horas (8 por dia)</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-muted-foreground">Duração personalizável: 1 a 7 dias</span>
+                      </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Percent className="h-3.5 w-3.5" />
-                      <span>{(plan.daily_return_rate * 100).toFixed(1)}% retorno diário</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>{plan.duration_days} dias de duração</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-3.5 w-3.5" />
-                      <span>Total: {formatCurrency(plan.amount * (1 + (plan.daily_return_rate * plan.duration_days)))}</span>
-                    </div>
-                    <Button 
-                      className="w-full mt-4" 
-                      onClick={() => openInvestModal(plan)}
-                      disabled={profile.available_balance < plan.amount}
-                    >
-                      Investir Agora
-                    </Button>
                   </CardContent>
                 </Card>
-              ))}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -1011,7 +1092,7 @@ const Dashboard = () => {
             <DialogHeader>
               <DialogTitle>Confirmar Investimento</DialogTitle>
               <DialogDescription>
-                Revise os detalhes do seu investimento
+                Escolha a duração e revise os detalhes do seu investimento
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -1024,18 +1105,44 @@ const Dashboard = () => {
                   <span className="font-bold">{formatCurrency(selectedPlan.amount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Retorno Diário:</span>
-                  <span className="font-bold text-success">{(selectedPlan.daily_return_rate * 100).toFixed(1)}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Duração:</span>
-                  <span className="font-bold">{selectedPlan.duration_days} dias</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Retorno Total Estimado:</span>
-                  <span className="font-bold text-primary">
-                    {formatCurrency(selectedPlan.amount * (1 + (selectedPlan.daily_return_rate * selectedPlan.duration_days)))}
+                  <span className="text-muted-foreground">Lucro a cada 3 horas:</span>
+                  <span className="font-bold text-success">
+                    {formatCurrency((selectedPlan.amount / 100) * 20)}
                   </span>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duração do Investimento:</Label>
+                  <Select 
+                    value={investmentDuration.toString()} 
+                    onValueChange={(value) => setInvestmentDuration(parseInt(value))}
+                  >
+                    <SelectTrigger id="duration">
+                      <SelectValue placeholder="Selecione a duração" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7].map((days) => (
+                        <SelectItem key={days} value={days.toString()}>
+                          {days} {days === 1 ? 'dia' : 'dias'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="p-3 bg-muted rounded-lg space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Distribuições por dia:</span>
+                    <span className="font-medium">8 (a cada 3 horas)</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total de distribuições:</span>
+                    <span className="font-medium">{investmentDuration * 8}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Lucro Total Estimado:</span>
+                    <span className="font-bold text-primary">
+                      {formatCurrency((selectedPlan.amount / 100) * 20 * investmentDuration * 8)}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex gap-3 pt-4">
