@@ -51,13 +51,23 @@ const Login = () => {
 
       if (data.session) {
         await refreshProfile();
+        
+        // Check if user is admin by querying user_roles table
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+
+        const isAdmin = roleData?.role === 'admin';
+        
         toast({
           title: 'Login realizado com sucesso!',
           description: 'Redirecionando...',
         });
         
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate(isAdmin ? '/admin' : '/dashboard');
         }, 500);
       }
     } catch (error: any) {
