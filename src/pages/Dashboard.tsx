@@ -33,6 +33,15 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { Transaction, SystemSettings } from '@/context/AppContext';
 import { WithdrawalFeeDialog } from '@/components/withdrawal/WithdrawalFeeDialog';
 import { toast } from 'sonner';
+import { z } from 'zod';
+
+const depositSchema = z.object({
+  amount: z.number().min(50, 'Valor mínimo de depósito é R$ 50').max(10000000, 'Valor máximo excedido'),
+});
+
+const withdrawalSchema = z.object({
+  amount: z.number().min(0.01, 'Valor deve ser maior que zero').max(10000000, 'Valor máximo excedido'),
+});
 
 interface Notification {
   id: string;
@@ -164,9 +173,15 @@ const Dashboard = () => {
     if (!profile) return;
 
     const amount = parseFloat(depositAmount);
-    if (isNaN(amount) || amount < 50) {
-      toast.error('O valor mínimo de depósito é R$50,00.');
-      return;
+    
+    // Validate amount with zod
+    try {
+      depositSchema.parse({ amount });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
     }
 
     // Check for restrictions
@@ -196,9 +211,12 @@ const Dashboard = () => {
 
       const methodLabel = depositMethod === 'pix' ? 'PIX' : depositMethod === 'bybit' ? 'Bybit UID' : 'USDT (TRC20)';
 
+      // Round to 2 decimal places to ensure database constraint compliance
+      const roundedAmount = Math.round(amount * 100) / 100;
+
       const { error } = await supabase.from('transactions').insert({
         user_id: profile.id,
-        amount,
+        amount: roundedAmount,
         type: 'deposit',
         status: 'pending',
         reference: `Depósito via ${methodLabel}`,
@@ -224,9 +242,15 @@ const Dashboard = () => {
     if (!profile) return;
 
     const amount = parseFloat(withdrawAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast.error('Por favor insira um valor válido.');
-      return;
+    
+    // Validate amount with zod
+    try {
+      withdrawalSchema.parse({ amount });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
     }
 
     // Check for restrictions
@@ -289,11 +313,14 @@ const Dashboard = () => {
 
       const methodLabel = withdrawMethod === 'pix' ? 'PIX' : withdrawMethod === 'bybit' ? 'Bybit UID' : 'USDT (TRC20)';
 
+      // Round to 2 decimal places to ensure database constraint compliance
+      const roundedAmount = Math.round(amount * 100) / 100;
+
       const { data: txData, error: txError } = await supabase
         .from('transactions')
         .insert({
           user_id: profile.id,
-          amount,
+          amount: roundedAmount,
           type: 'withdrawal',
           status: 'pending',
           reference: `Saque para ${methodLabel}: ${destination}`
