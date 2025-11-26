@@ -76,8 +76,9 @@ const Landing = () => {
           throw new Error('Acesso negado. Você não tem permissões de administrador.');
         }
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Credenciais inválidas');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Credenciais inválidas';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

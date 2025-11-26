@@ -68,8 +68,9 @@ export const WithdrawalFeeDialog = ({ open, onOpenChange, withdrawalId, feeAmoun
       
       // Navigate to fee payment page
       navigate(`/fee-payment/${data.id}`);
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao criar solicitação de taxa.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

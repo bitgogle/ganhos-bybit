@@ -117,8 +117,9 @@ const FeePayment = () => {
 
       toast.success('Comprovante enviado com sucesso! Aguarde a aprovação do administrador.');
       fetchFeeRequest();
-    } catch (err: any) {
-      toast.error(err.message || 'Erro ao enviar comprovante.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao enviar comprovante.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
