@@ -13,7 +13,7 @@ import { z } from 'zod';
 const registerSchema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres').max(100, 'Nome muito longo'),
   email: z.string().email('Email inválido').max(255, 'Email muito longo'),
-  phone: z.string().regex(/^\(\d{2}\)\s?\d{4,5}-?\d{4}$/, 'Telefone inválido. Use o formato (XX) XXXXX-XXXX'),
+  phone: z.string().regex(/^\d{10,11}$/, 'Telefone inválido. Digite 10 ou 11 dígitos'),
   cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF inválido. Use o formato XXX.XXX.XXX-XX'),
   password: z.string()
     .min(8, 'Senha deve ter no mínimo 8 caracteres')
@@ -153,7 +153,7 @@ const Register = () => {
               <Input
                 id="phone"
                 name="phone"
-                placeholder="(00) 00000-0000"
+                placeholder="11987654321"
                 value={formData.phone}
                 onChange={handleChange}
                 required
