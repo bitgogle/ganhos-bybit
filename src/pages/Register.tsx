@@ -94,11 +94,12 @@ const Register = () => {
       setTimeout(() => {
         navigate('/pending-approval');
       }, 2000);
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Ocorreu um erro ao criar sua conta.';
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao criar sua conta.',
+        description: message,
       });
     } finally {
       setLoading(false);

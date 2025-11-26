@@ -41,8 +41,9 @@ export const UserRestrictionManager = ({ user, onUpdate }: UserRestrictionManage
       toast.success(newRestricted ? 'Usuário restrito com sucesso!' : 'Restrição removida com sucesso!');
       setConfirmOpen(false);
       onUpdate();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao atualizar restrição.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

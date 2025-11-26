@@ -75,7 +75,7 @@ const Admin = () => {
       // Fetch user names for transactions
       if (txRes.data) {
         const enrichedTx = await Promise.all(
-          txRes.data.map(async (tx: any) => {
+          txRes.data.map(async (tx) => {
             const { data: userData } = await supabase
               .from('profiles')
               .select('name, email')
@@ -143,8 +143,9 @@ const Admin = () => {
 
       toast.success('Usuário aprovado com sucesso!');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao aprovar usuário.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -170,8 +171,9 @@ const Admin = () => {
 
       toast.success('Usuário rejeitado.');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao rejeitar usuário.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -227,8 +229,9 @@ const Admin = () => {
 
       toast.success('Transação aprovada!');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao aprovar transação.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -268,8 +271,9 @@ const Admin = () => {
 
       toast.success('Transação rejeitada.');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao rejeitar transação.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -292,8 +296,9 @@ const Admin = () => {
 
       toast.success('Configurações atualizadas com sucesso!');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao atualizar configurações.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

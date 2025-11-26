@@ -33,7 +33,7 @@ export const WithdrawalFeeSettings = () => {
         setFeeAmount(data.withdrawal_fee_amount?.toString() || '');
         setFeeMode((data.withdrawal_fee_mode as 'deduct' | 'deposit') || 'deduct');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching fee settings:', err);
     }
   };
@@ -59,8 +59,9 @@ export const WithdrawalFeeSettings = () => {
       if (error) throw error;
 
       toast.success('Configurações de taxa atualizadas com sucesso!');
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao salvar configurações.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

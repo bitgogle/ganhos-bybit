@@ -230,8 +230,9 @@ const Dashboard = () => {
       setProofFile(null);
       setDepositOpen(false);
       fetchTransactions();
-    } catch (err: any) {
-      toast.error(err.message || 'Erro ao processar depósito.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao processar depósito.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -346,8 +347,9 @@ const Dashboard = () => {
         setFeeAmount(fee);
         setFeeDialogOpen(true);
       }
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao processar saque.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -407,8 +409,9 @@ const Dashboard = () => {
       setInvestOpen(false);
       await refreshProfile();
       fetchTransactions();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao processar investimento.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

@@ -70,11 +70,12 @@ const Login = () => {
           navigate(isAdmin ? '/admin' : '/dashboard');
         }, 500);
       }
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Email ou senha incorretos.';
       toast({
         variant: 'destructive',
         title: 'Erro no login',
-        description: error.message || 'Email ou senha incorretos.',
+        description: message,
       });
     } finally {
       setLoading(false);
