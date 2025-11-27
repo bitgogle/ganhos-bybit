@@ -339,7 +339,7 @@ const Landing = () => {
         {/* Download App Section */}
         <section className="w-full py-16 md:py-24 bg-gradient-to-b from-background to-card/30">
           <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center text-center space-y-6 max-w-3xl mx-auto">
+            <div className="flex flex-col items-center text-center space-y-6 max-w-3xl mx-auto animate-fade-in">
               <Badge variant="secondary" className="px-6 py-2 text-sm">
                 <Zap className="mr-2 h-4 w-4" />
                 Baixe Agora

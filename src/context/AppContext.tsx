@@ -53,6 +53,8 @@ export interface InvestmentPlan {
 export interface SystemSettings {
   id: number;
   pix_key: string;
+  pix_name?: string;
+  pix_bank?: string;
   bybit_uid: string;
   usdt_address: string;
   withdrawal_fee_enabled?: boolean;

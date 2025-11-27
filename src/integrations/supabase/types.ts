@@ -158,7 +158,9 @@ export type Database = {
           bybit_uid: string | null
           created_at: string | null
           id: number
+          pix_bank: string | null
           pix_key: string | null
+          pix_name: string | null
           updated_at: string | null
           usdt_address: string | null
           withdrawal_fee_amount: number | null
@@ -169,7 +171,9 @@ export type Database = {
           bybit_uid?: string | null
           created_at?: string | null
           id?: number
+          pix_bank?: string | null
           pix_key?: string | null
+          pix_name?: string | null
           updated_at?: string | null
           usdt_address?: string | null
           withdrawal_fee_amount?: number | null
@@ -180,7 +184,9 @@ export type Database = {
           bybit_uid?: string | null
           created_at?: string | null
           id?: number
+          pix_bank?: string | null
           pix_key?: string | null
+          pix_name?: string | null
           updated_at?: string | null
           usdt_address?: string | null
           withdrawal_fee_amount?: number | null

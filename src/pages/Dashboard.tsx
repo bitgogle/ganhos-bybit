@@ -60,13 +60,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   
-  // Deposit dialog state
-  const [depositOpen, setDepositOpen] = useState(false);
-  const [depositAmount, setDepositAmount] = useState('');
-  const [depositMethod, setDepositMethod] = useState<'pix' | 'bybit' | 'usdt'>('pix');
-  const [proofFile, setProofFile] = useState<File | null>(null);
-  const [systemSettings, setSystemSettings] = useState<SystemSettings | null>(null);
-  
   // Withdraw dialog state
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -160,82 +153,6 @@ const Dashboard = () => {
       supabase.removeChannel(notifChannel);
     };
   }, [profile, fetchTransactions, fetchNotifications, refreshProfile]);
-
-  const openDepositModal = async () => {
-    setDepositOpen(true);
-    setProofFile(null);
-    const { data } = await supabase.from('system_settings').select('*').maybeSingle();
-    if (data) setSystemSettings(data as SystemSettings);
-  };
-
-  const handleDeposit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!profile) return;
-
-    const amount = parseFloat(depositAmount);
-    
-    // Validate amount with zod
-    try {
-      depositSchema.parse({ amount });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
-        return;
-      }
-    }
-
-    // Check for restrictions
-    if (profile.restricted) {
-      toast.error('Sua conta está restrita. Entre em contato com o suporte.');
-      return;
-    }
-
-    if (!proofFile) {
-      toast.error('Por favor, envie o comprovante de pagamento.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const fileExt = proofFile.name.split('.').pop();
-      const fileName = `${profile.id}_${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('proofs')
-        .upload(fileName, proofFile);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage.from('proofs').getPublicUrl(fileName);
-
-      const methodLabel = depositMethod === 'pix' ? 'PIX' : depositMethod === 'bybit' ? 'Bybit UID' : 'USDT (TRC20)';
-
-      // Round to 2 decimal places to ensure database constraint compliance
-      const roundedAmount = Math.round(amount * 100) / 100;
-
-      const { error } = await supabase.from('transactions').insert({
-        user_id: profile.id,
-        amount: roundedAmount,
-        type: 'deposit',
-        status: 'pending',
-        reference: `Depósito via ${methodLabel}`,
-        proof_url: publicUrl
-      });
-
-      if (error) throw error;
-
-      toast.success('Solicitação de depósito enviada com sucesso! Aguarde aprovação.');
-      setDepositAmount('');
-      setProofFile(null);
-      setDepositOpen(false);
-      fetchTransactions();
-    } catch (err: any) {
-      toast.error(err.message || 'Erro ao processar depósito.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleWithdrawal = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -620,12 +537,28 @@ const Dashboard = () => {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                onClick={openDepositModal}
+                onClick={() => navigate('/deposit/pix')}
                 className="flex-1 sm:flex-none flex items-center justify-center"
                 variant="default"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Depositar
+                Depositar (PIX)
+              </Button>
+              <Button
+                onClick={() => navigate('/deposit/bybit')}
+                className="flex-1 sm:flex-none flex items-center justify-center"
+                variant="outline"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Bybit UID
+              </Button>
+              <Button
+                onClick={() => navigate('/deposit/usdt')}
+                className="flex-1 sm:flex-none flex items-center justify-center"
+                variant="outline"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                USDT
               </Button>
               <Button
                 onClick={() => setWithdrawOpen(true)}
@@ -845,148 +778,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </main>
-
-      {/* Deposit Dialog */}
-      <Dialog open={depositOpen} onOpenChange={setDepositOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ArrowDownCircle className="h-5 w-5 text-success" />
-              Fazer Depósito
-            </DialogTitle>
-            <DialogDescription>
-              Escolha o método, faça o pagamento e envie o comprovante.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleDeposit} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Método de Pagamento</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  type="button"
-                  variant={depositMethod === 'pix' ? 'default' : 'outline'}
-                  onClick={() => setDepositMethod('pix')}
-                  className="w-full"
-                >
-                  PIX
-                </Button>
-                <Button
-                  type="button"
-                  variant={depositMethod === 'bybit' ? 'default' : 'outline'}
-                  onClick={() => setDepositMethod('bybit')}
-                  className="w-full"
-                >
-                  Bybit UID
-                </Button>
-                <Button
-                  type="button"
-                  variant={depositMethod === 'usdt' ? 'default' : 'outline'}
-                  onClick={() => setDepositMethod('usdt')}
-                  className="w-full"
-                >
-                  USDT
-                </Button>
-              </div>
-            </div>
-
-            {systemSettings && (
-              <div className="p-4 bg-muted rounded-lg space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">Endereço de Destino ({depositMethod.toUpperCase()})</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(
-                      depositMethod === 'pix' ? systemSettings.pix_key :
-                      depositMethod === 'bybit' ? systemSettings.bybit_uid :
-                      systemSettings.usdt_address
-                    )}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-                <p className="text-sm font-mono break-all">
-                  {depositMethod === 'pix' ? (systemSettings.pix_key || 'Contate o Suporte') :
-                   depositMethod === 'bybit' ? (systemSettings.bybit_uid || 'Contate o Suporte') :
-                   (systemSettings.usdt_address || 'Contate o Suporte')}
-                </p>
-                <div className="flex items-start gap-2 text-xs text-muted-foreground mt-2">
-                  <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                  <p>Envie o valor exato para este endereço. O processamento pode levar até 30 minutos.</p>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="amount">Valor (BRL)</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
-                <Input
-                  id="amount"
-                  type="number"
-                  min="50"
-                  step="0.01"
-                  placeholder="100,00"
-                  value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="proof">Comprovante de Pagamento</Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-4">
-                {proofFile ? (
-                  <div className="text-center">
-                    <CheckCircle className="w-8 h-8 mb-2 text-success mx-auto" />
-                    <p className="text-sm font-medium">{proofFile.name}</p>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setProofFile(null)}
-                      className="mt-2"
-                    >
-                      Alterar arquivo
-                    </Button>
-                  </div>
-                ) : (
-                  <label htmlFor="proof-input" className="cursor-pointer flex flex-col items-center">
-                    <ArrowUpCircle className="w-8 h-8 mb-3 text-muted-foreground" />
-                    <p className="text-sm font-medium">Clique para enviar o comprovante</p>
-                    <p className="text-xs text-muted-foreground mt-1">JPG, JPEG ou PNG</p>
-                    <Input
-                      id="proof-input"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setProofFile(e.target.files?.[0] || null)}
-                      className="hidden"
-                      required
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setDepositOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" className="flex-1" disabled={loading}>
-                {loading ? 'Enviando...' : 'Confirmar Depósito'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       {/* Withdraw Dialog */}
       <Dialog open={withdrawOpen} onOpenChange={setWithdrawOpen}>
