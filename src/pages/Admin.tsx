@@ -58,6 +58,8 @@ const Admin = () => {
 
   // Settings form
   const [pixKey, setPixKey] = useState('');
+  const [pixName, setPixName] = useState('');
+  const [pixBank, setPixBank] = useState('');
   const [bybitUid, setBybitUid] = useState('');
   const [usdtAddress, setUsdtAddress] = useState('');
 
@@ -97,6 +99,8 @@ const Admin = () => {
         const settings = settingsRes.data as SystemSettings;
         setSystemSettings(settings);
         setPixKey(settings.pix_key || '');
+        setPixName(settings.pix_name || '');
+        setPixBank(settings.pix_bank || '');
         setBybitUid(settings.bybit_uid || '');
         setUsdtAddress(settings.usdt_address || '');
       }
@@ -289,6 +293,8 @@ const Admin = () => {
         .from('system_settings')
         .update({
           pix_key: pixKey,
+          pix_name: pixName,
+          pix_bank: pixBank,
           bybit_uid: bybitUid,
           usdt_address: usdtAddress,
         })
@@ -692,6 +698,34 @@ const Admin = () => {
                     />
                     <p className="text-sm text-muted-foreground">
                       Esta chave será exibida para os usuários ao fazer depósitos via PIX
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pix_name">Nome para PIX</Label>
+                    <Input
+                      id="pix_name"
+                      type="text"
+                      placeholder="Digite o nome completo"
+                      value={pixName}
+                      onChange={(e) => setPixName(e.target.value)}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Nome do titular da conta PIX
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pix_bank">Banco para PIX</Label>
+                    <Input
+                      id="pix_bank"
+                      type="text"
+                      placeholder="Digite o nome do banco"
+                      value={pixBank}
+                      onChange={(e) => setPixBank(e.target.value)}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Nome do banco da conta PIX
                     </p>
                   </div>
 

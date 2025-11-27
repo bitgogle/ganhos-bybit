@@ -12,6 +12,7 @@ import PendingApproval from "./pages/PendingApproval";
 import Rejected from "./pages/Rejected";
 import Admin from "./pages/Admin";
 import FeePayment from "./pages/FeePayment";
+import DepositDetails from "./pages/DepositDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/rejected" element={<Rejected />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/fee-payment/:feeId" element={<FeePayment />} />
+            <Route path="/deposit/:method" element={<DepositDetails />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
