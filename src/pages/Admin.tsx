@@ -49,6 +49,12 @@ const Admin = () => {
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Balance editing state
+  const [isEditingBalance, setIsEditingBalance] = useState(false);
+  const [editAvailableBalance, setEditAvailableBalance] = useState('');
+  const [editInvestedBalance, setEditInvestedBalance] = useState('');
+  const [editProfitBalance, setEditProfitBalance] = useState('');
 
   // Settings form
   const [pixKey, setPixKey] = useState('');
@@ -292,6 +298,48 @@ const Admin = () => {
 
       toast.success('Configurações atualizadas com sucesso!');
       fetchData();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditBalance = (user: Profile) => {
+    setIsEditingBalance(true);
+    setEditAvailableBalance(user.available_balance.toString());
+    setEditInvestedBalance(user.invested_balance.toString());
+    setEditProfitBalance(user.profit_balance.toString());
+  };
+
+  const handleSaveBalance = async () => {
+    if (!selectedUser) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          available_balance: parseFloat(editAvailableBalance),
+          invested_balance: parseFloat(editInvestedBalance),
+          profit_balance: parseFloat(editProfitBalance),
+        })
+        .eq('id', selectedUser.id);
+
+      if (error) throw error;
+
+      // Send notification to user
+      await supabase.from('notifications').insert({
+        user_id: selectedUser.id,
+        title: 'Saldos Atualizados',
+        message: 'Seus saldos foram atualizados pelo administrador.',
+        type: 'info'
+      });
+
+      toast.success('Saldos atualizados com sucesso!');
+      setIsEditingBalance(false);
+      fetchData();
+      setSelectedUser(null);
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -689,7 +737,10 @@ const Admin = () => {
 
       {/* User Details Dialog */}
       {selectedUser && (
-        <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+        <Dialog open={!!selectedUser} onOpenChange={() => {
+          setSelectedUser(null);
+          setIsEditingBalance(false);
+        }}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Detalhes do Usuário</DialogTitle>
@@ -718,20 +769,92 @@ const Admin = () => {
                   <p className="font-medium font-mono">{selectedUser.cpf}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Saldo Disponível</Label>
-                  <p className="font-bold text-primary">{formatCurrency(selectedUser.available_balance)}</p>
+              
+              {/* Balance Section - Editable */}
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-base font-semibold">Saldos</Label>
+                  {!isEditingBalance ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEditBalance(selectedUser)}
+                    >
+                      <DollarSign className="h-4 w-4 mr-1" />
+                      Editar Saldos
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setIsEditingBalance(false)}
+                        disabled={loading}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button 
+                        size="sm"
+                        onClick={handleSaveBalance}
+                        disabled={loading}
+                      >
+                        Salvar
+                      </Button>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <Label className="text-muted-foreground">Saldo Investido</Label>
-                  <p className="font-bold">{formatCurrency(selectedUser.invested_balance)}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Lucros</Label>
-                  <p className="font-bold text-success">{formatCurrency(selectedUser.profit_balance)}</p>
-                </div>
+                
+                {!isEditingBalance ? (
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-muted-foreground">Saldo Disponível</Label>
+                      <p className="font-bold text-primary">{formatCurrency(selectedUser.available_balance)}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Saldo Investido</Label>
+                      <p className="font-bold">{formatCurrency(selectedUser.invested_balance)}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Lucros</Label>
+                      <p className="font-bold text-success">{formatCurrency(selectedUser.profit_balance)}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="available_balance">Saldo Disponível</Label>
+                      <Input
+                        id="available_balance"
+                        type="number"
+                        step="0.01"
+                        value={editAvailableBalance}
+                        onChange={(e) => setEditAvailableBalance(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="invested_balance">Saldo Investido</Label>
+                      <Input
+                        id="invested_balance"
+                        type="number"
+                        step="0.01"
+                        value={editInvestedBalance}
+                        onChange={(e) => setEditInvestedBalance(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="profit_balance">Lucros</Label>
+                      <Input
+                        id="profit_balance"
+                        type="number"
+                        step="0.01"
+                        value={editProfitBalance}
+                        onChange={(e) => setEditProfitBalance(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Chave PIX</Label>
