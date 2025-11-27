@@ -66,9 +66,7 @@ const Login = () => {
           description: 'Redirecionando...',
         });
         
-        setTimeout(() => {
-          navigate(isAdmin ? '/admin' : '/dashboard');
-        }, 500);
+        navigate(isAdmin ? '/admin' : '/dashboard');
       }
     } catch (error: any) {
       toast({

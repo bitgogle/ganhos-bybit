@@ -77,6 +77,7 @@ const Register = () => {
         email: formData.email.trim(),
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             name: formData.name.trim(),
             phone: formData.phone.trim(),
