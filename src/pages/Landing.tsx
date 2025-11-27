@@ -69,8 +69,11 @@ const Landing = () => {
           .single();
 
         if (roleData) {
+          setIsAdminOpen(false);
           toast.success('Login de administrador realizado!');
-          navigate('/admin');
+          setTimeout(() => {
+            navigate('/admin');
+          }, 100);
         } else {
           await supabase.auth.signOut();
           throw new Error('Acesso negado. Você não tem permissões de administrador.');
@@ -330,6 +333,51 @@ const Landing = () => {
                 </AccordionItem>
               ))}
             </Accordion>
+          </div>
+        </section>
+
+        {/* Download App Section */}
+        <section className="w-full py-16 md:py-24 bg-gradient-to-b from-background to-card/30">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center text-center space-y-6 max-w-3xl mx-auto">
+              <Badge variant="secondary" className="px-6 py-2 text-sm">
+                <Zap className="mr-2 h-4 w-4" />
+                Baixe Agora
+              </Badge>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                Tenha a Bybit na Palma da Sua Mão
+              </h2>
+              <p className="text-muted-foreground md:text-lg max-w-2xl">
+                Baixe o aplicativo oficial da Bybit Wallet e gerencie seus investimentos onde estiver. Disponível para Android e iOS.
+              </p>
+              <Button 
+                size="lg" 
+                className="gradient-gold shadow-gold text-lg px-12 py-6 hover:scale-105 transition-transform"
+                onClick={() => window.open('https://play.google.com/store/apps/details?id=com.bybit.app', '_blank')}
+              >
+                DOWNLOAD
+              </Button>
+              <p className="text-sm text-muted-foreground mt-4">
+                Clique no link para baixar o aplicativo Bybit Wallet na Play Store
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-8 w-full">
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-1 mb-2">
+                    <h3 className="text-2xl font-bold text-primary">4.8</h3>
+                    <Star className="h-5 w-5 fill-primary text-primary" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Avaliação na Play Store</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <h3 className="text-2xl font-bold text-primary">50M+</h3>
+                  <p className="text-sm text-muted-foreground">Downloads</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <h3 className="text-2xl font-bold text-primary">24/7</h3>
+                  <p className="text-sm text-muted-foreground">Acesso Total</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
