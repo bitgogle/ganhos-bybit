@@ -62,7 +62,40 @@ This project is built with:
 
 ## How can I deploy this project?
 
+### Option 1: Deploy via Lovable
 Simply open [Lovable](https://lovable.dev/projects/1fa48699-dd02-46b7-8d8e-78d89520d588) and click on Share -> Publish.
+
+### Option 2: Deploy to Vercel Production
+
+This project includes a GitHub Actions workflow for automatic deployment to Vercel. To set it up:
+
+1. **Create a Vercel account** at [vercel.com](https://vercel.com) if you don't have one.
+
+2. **Link your project to Vercel**:
+   - Go to Vercel dashboard and click "Add New Project"
+   - Import this GitHub repository
+   - Configure the project settings (they should auto-detect from `vercel.json`)
+
+3. **Configure Environment Variables in Vercel**:
+   Go to your Vercel project Settings > Environment Variables and add:
+   - `VITE_SUPABASE_URL` - Your Supabase URL
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` - Your Supabase anon key
+   - `VITE_SUPABASE_PROJECT_ID` - Your Supabase project ID
+
+4. **Get your Vercel credentials for GitHub Actions**:
+   - **VERCEL_TOKEN**: Go to Vercel Settings > Tokens > Create Token
+   - **VERCEL_ORG_ID**: Found in Vercel Settings > General > Your ID
+   - **VERCEL_PROJECT_ID**: Found in your project's Settings > General > Project ID
+
+5. **Add GitHub Secrets**:
+   Go to your GitHub repository Settings > Secrets and variables > Actions, and add:
+   - `VERCEL_TOKEN`
+   - `VERCEL_ORG_ID`
+   - `VERCEL_PROJECT_ID`
+
+6. **Deploy**: 
+   - Push to `main` branch for automatic deployment
+   - Or go to Actions tab and manually trigger the "Deploy to Vercel Production" workflow
 
 ## Can I connect a custom domain to my Lovable project?
 
