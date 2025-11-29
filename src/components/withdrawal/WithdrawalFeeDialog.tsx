@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Clock, Copy, CheckCircle } from 'lucide-react';
+import { AlertCircle, Clock, Copy } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { supabase } from '@/integrations/supabase/client';
 import { SystemSettings } from '@/context/AppContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { getErrorMessage } from '@/lib/utils';
 
 interface WithdrawalFeeDialogProps {
   open: boolean;
@@ -68,8 +69,8 @@ export const WithdrawalFeeDialog = ({ open, onOpenChange, withdrawalId, feeAmoun
       
       // Navigate to fee payment page
       navigate(`/fee-payment/${data.id}`);
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

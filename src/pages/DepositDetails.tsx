@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Copy, Upload, Clock, ArrowLeft, Building } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
+import { getErrorMessage } from '@/lib/utils';
 import { toast } from 'sonner';
 import { SystemSettings } from '@/context/AppContext';
 
@@ -94,8 +95,8 @@ const DepositDetails = () => {
 
       toast.success('Depósito marcado como pago! Aguarde aprovação.');
       navigate('/dashboard');
-    } catch (err: any) {
-      toast.error(err.message || 'Erro ao processar depósito.');
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err) || 'Erro ao processar depósito.');
     } finally {
       setLoading(false);
     }

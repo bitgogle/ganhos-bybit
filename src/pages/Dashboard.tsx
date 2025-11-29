@@ -34,6 +34,7 @@ import { Transaction, SystemSettings } from '@/context/AppContext';
 import { WithdrawalFeeDialog } from '@/components/withdrawal/WithdrawalFeeDialog';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { getErrorMessage } from '@/lib/utils';
 
 const depositSchema = z.object({
   amount: z.number().min(50, 'Valor mínimo de depósito é R$ 50').max(10000000, 'Valor máximo excedido'),
@@ -263,8 +264,8 @@ const Dashboard = () => {
         setFeeAmount(fee);
         setFeeDialogOpen(true);
       }
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -324,8 +325,8 @@ const Dashboard = () => {
       setInvestOpen(false);
       await refreshProfile();
       fetchTransactions();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
