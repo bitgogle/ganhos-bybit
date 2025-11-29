@@ -27,6 +27,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
 
 const Landing = () => {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -79,8 +80,8 @@ const Landing = () => {
           throw new Error('Acesso negado. Você não tem permissões de administrador.');
         }
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Credenciais inválidas');
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error) || 'Credenciais inválidas');
     } finally {
       setLoading(false);
     }
