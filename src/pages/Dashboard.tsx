@@ -28,10 +28,13 @@ import {
   Clock,
   Percent,
   Star,
+  Send,
+  Receipt,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { Transaction, SystemSettings } from '@/context/AppContext';
 import { WithdrawalFeeDialog } from '@/components/withdrawal/WithdrawalFeeDialog';
+import { TransactionReceipt } from '@/components/TransactionReceipt';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -74,6 +77,10 @@ const Dashboard = () => {
   const [investOpen, setInvestOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<typeof investmentPlans[0] | null>(null);
   const [investmentDuration, setInvestmentDuration] = useState<number>(1);
+
+  // Transaction receipt state
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
 
   // Notifications
   const [showNotifications, setShowNotifications] = useState(false);
@@ -535,18 +542,33 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               <Button
-                onClick={() => navigate('/deposit/pix')}
-                className="flex-1 sm:flex-none flex items-center justify-center"
+                onClick={() => navigate('/add-funds')}
+                className="flex items-center justify-center gradient-gold"
+              >
+                <Wallet className="mr-2 h-4 w-4" />
+                ADD FUNDS
+              </Button>
+              <Button
+                onClick={() => navigate('/pix-transfer')}
+                className="flex items-center justify-center"
                 variant="default"
               >
+                <Send className="mr-2 h-4 w-4" />
+                PIX Transfer
+              </Button>
+              <Button
+                onClick={() => navigate('/deposit/pix')}
+                className="flex items-center justify-center"
+                variant="outline"
+              >
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Depositar (PIX)
+                Depositar
               </Button>
               <Button
                 onClick={() => navigate('/deposit/bybit')}
-                className="flex-1 sm:flex-none flex items-center justify-center"
+                className="flex items-center justify-center"
                 variant="outline"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -554,7 +576,7 @@ const Dashboard = () => {
               </Button>
               <Button
                 onClick={() => navigate('/deposit/usdt')}
-                className="flex-1 sm:flex-none flex items-center justify-center"
+                className="flex items-center justify-center"
                 variant="outline"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -562,7 +584,7 @@ const Dashboard = () => {
               </Button>
               <Button
                 onClick={() => setWithdrawOpen(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center"
+                className="flex items-center justify-center"
                 variant="outline"
               >
                 <MinusCircle className="mr-2 h-4 w-4" />
@@ -603,7 +625,14 @@ const Dashboard = () => {
             ) : (
               <div className="space-y-4">
                 {filteredTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                  <div 
+                    key={transaction.id} 
+                    className="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                      setSelectedTransaction(transaction);
+                      setReceiptOpen(true);
+                    }}
+                  >
                     <div className="flex items-center gap-3">
                       {transaction.type === 'deposit' ? (
                         <ArrowDownCircle className="h-5 w-5 text-success" />
@@ -616,27 +645,30 @@ const Dashboard = () => {
                       )}
                       <div>
                         <p className="font-medium">
-                          {transaction.type === 'deposit' ? 'Depósito' : 
-                           transaction.type === 'withdrawal' ? 'Saque' :
+                          {transaction.type === 'deposit' ? 'Depósito Recebido' : 
+                           transaction.type === 'withdrawal' ? 'Saque Enviado' :
                            transaction.type === 'investment' ? 'Investimento' : 'Lucro'}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {formatDate(transaction.created_at)}
                         </p>
                         {transaction.reference && (
-                          <p className="text-xs text-muted-foreground">{transaction.reference}</p>
+                          <p className="text-xs text-muted-foreground max-w-[300px] truncate">{transaction.reference}</p>
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold">{formatCurrency(transaction.amount)}</p>
-                      <Badge variant={
-                        transaction.status === 'approved' || transaction.status === 'completed' ? 'default' :
-                        transaction.status === 'pending' ? 'secondary' : 'destructive'
-                      }>
-                        {transaction.status === 'approved' || transaction.status === 'completed' ? 'Aprovado' :
-                         transaction.status === 'pending' ? 'Pendente' : 'Rejeitado'}
-                      </Badge>
+                    <div className="text-right flex items-center gap-3">
+                      <div>
+                        <p className="font-bold">{formatCurrency(transaction.amount)}</p>
+                        <Badge variant={
+                          transaction.status === 'approved' || transaction.status === 'completed' ? 'default' :
+                          transaction.status === 'pending' ? 'secondary' : 'destructive'
+                        }>
+                          {transaction.status === 'approved' || transaction.status === 'completed' ? 'Aprovado' :
+                           transaction.status === 'pending' ? 'Pendente' : 'Rejeitado'}
+                        </Badge>
+                      </div>
+                      <Receipt className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
                 ))}
@@ -994,6 +1026,16 @@ const Dashboard = () => {
           withdrawalId={pendingWithdrawalId}
           feeAmount={feeAmount}
           userId={profile.id}
+        />
+      )}
+
+      {/* Transaction Receipt Dialog */}
+      {selectedTransaction && (
+        <TransactionReceipt
+          transaction={selectedTransaction}
+          open={receiptOpen}
+          onOpenChange={setReceiptOpen}
+          userName={profile.name}
         />
       )}
     </div>

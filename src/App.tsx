@@ -13,6 +13,8 @@ import Rejected from "./pages/Rejected";
 import Admin from "./pages/Admin";
 import FeePayment from "./pages/FeePayment";
 import DepositDetails from "./pages/DepositDetails";
+import AddFunds from "./pages/AddFunds";
+import PixTransfer from "./pages/PixTransfer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/fee-payment/:feeId" element={<FeePayment />} />
             <Route path="/deposit/:method" element={<DepositDetails />} />
+            <Route path="/add-funds" element={<AddFunds />} />
+            <Route path="/pix-transfer" element={<PixTransfer />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
