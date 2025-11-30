@@ -1,5 +1,4 @@
-import { useRef } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,10 +12,12 @@ import {
   Share2,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  Loader2
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { Transaction } from '@/context/AppContext';
+import { toast } from 'sonner';
 
 interface TransactionReceiptProps {
   transaction: Transaction;
@@ -32,6 +33,8 @@ export const TransactionReceipt = ({
   userName 
 }: TransactionReceiptProps) => {
   const receiptRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const getTransactionIcon = () => {
     switch (transaction.type) {
@@ -121,80 +124,135 @@ export const TransactionReceipt = ({
     return Object.keys(details).length > 0 ? details : null;
   };
 
+  // Capture the receipt as a high-quality image
+  const captureReceiptAsImage = async (): Promise<HTMLCanvasElement | null> => {
+    if (!receiptRef.current) return null;
+    
+    const { default: html2canvas } = await import('html2canvas');
+    
+    // Capture the receipt with high quality settings
+    const canvas = await html2canvas(receiptRef.current, {
+      scale: 3, // High resolution for clear image
+      backgroundColor: '#1a1a1a',
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      width: receiptRef.current.scrollWidth,
+      height: receiptRef.current.scrollHeight,
+    });
+    
+    return canvas;
+  };
+
   const handleDownloadPDF = async () => {
     if (!receiptRef.current) return;
     
+    setIsGeneratingPDF(true);
+    
     try {
-      // Dynamic import for jspdf and html2canvas
-      const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
-        import('jspdf'),
-        import('html2canvas')
-      ]);
+      const { default: jsPDF } = await import('jspdf');
       
-      const canvas = await html2canvas(receiptRef.current, {
-        scale: 2,
-        backgroundColor: '#1a1a1a',
-        logging: false
-      });
+      // Capture receipt as image
+      const canvas = await captureReceiptAsImage();
+      if (!canvas) {
+        throw new Error('Failed to capture receipt');
+      }
       
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      
+      // Calculate dimensions to fit the receipt image in PDF
+      // A4 dimensions: 210mm x 297mm
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      const margin = 10;
+      const availableWidth = pdfWidth - (margin * 2);
+      const availableHeight = pdfHeight - (margin * 2);
+      
+      // Calculate the image dimensions maintaining aspect ratio
+      const imgAspectRatio = canvas.width / canvas.height;
+      let imgWidth = availableWidth;
+      let imgHeight = imgWidth / imgAspectRatio;
+      
+      // If height exceeds available height, scale down
+      if (imgHeight > availableHeight) {
+        imgHeight = availableHeight;
+        imgWidth = imgHeight * imgAspectRatio;
+      }
+      
+      // Center the image horizontally
+      const xOffset = margin + (availableWidth - imgWidth) / 2;
+      
+      // Create PDF with the receipt image
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
       
-      const imgWidth = 190;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // Add the receipt image to PDF (full receipt as image, not text)
+      pdf.addImage(imgData, 'PNG', xOffset, margin, imgWidth, imgHeight);
       
-      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      // Save the PDF
       pdf.save(`comprovante-${transaction.id.slice(0, 8)}.pdf`);
+      
+      toast.success('PDF do comprovante baixado com sucesso!');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      // Fallback: print the receipt
-      window.print();
+      toast.error('Erro ao gerar PDF. Tente novamente.');
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
   const handleShare = async () => {
     if (!receiptRef.current) return;
     
+    setIsSharing(true);
+    
     try {
-      const { default: html2canvas } = await import('html2canvas');
+      // Capture receipt as image
+      const canvas = await captureReceiptAsImage();
+      if (!canvas) {
+        throw new Error('Failed to capture receipt');
+      }
       
-      const canvas = await html2canvas(receiptRef.current, {
-        scale: 2,
-        backgroundColor: '#1a1a1a',
-        logging: false
+      // Convert canvas to blob
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/png', 1.0);
       });
       
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        
-        const file = new File([blob], `comprovante-${transaction.id.slice(0, 8)}.png`, {
-          type: 'image/png'
+      if (!blob) {
+        throw new Error('Failed to create image blob');
+      }
+      
+      const fileName = `comprovante-${transaction.id.slice(0, 8)}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+      
+      // Try native share API first
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'Comprovante de Transação - Ganhos Bybit',
+          text: `Comprovante de ${getTransactionTypeLabel()} - ${formatCurrency(transaction.amount)}`,
+          files: [file]
         });
-        
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: 'Comprovante de Transação',
-            text: `Comprovante de ${getTransactionTypeLabel()} - ${formatCurrency(transaction.amount)}`,
-            files: [file]
-          });
-        } else {
-          // Fallback: download the image
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `comprovante-${transaction.id.slice(0, 8)}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        }
-      }, 'image/png');
+        toast.success('Comprovante compartilhado!');
+      } else {
+        // Fallback: download the image directly
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success('Imagem do comprovante baixada!');
+      }
     } catch (error) {
       console.error('Error sharing:', error);
+      toast.error('Erro ao compartilhar. Tente novamente.');
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -207,9 +265,21 @@ export const TransactionReceipt = ({
           <DialogTitle>Comprovante de Transação</DialogTitle>
         </DialogHeader>
         
-        {/* Receipt Content */}
-        <div ref={receiptRef} className="bg-card rounded-lg p-6 space-y-6">
-          {/* Header */}
+        {/* Receipt Content - This entire div is captured as an image for PDF */}
+        <div 
+          ref={receiptRef} 
+          className="bg-[#1a1a1a] rounded-lg p-6 space-y-6 border border-border"
+          style={{ backgroundColor: '#1a1a1a' }}
+        >
+          {/* Header with Logo */}
+          <div className="text-center space-y-1 pb-2">
+            <h2 className="text-lg font-bold text-primary">Ganhos Bybit</h2>
+            <p className="text-xs text-muted-foreground">Comprovante de Transação</p>
+          </div>
+
+          <Separator />
+
+          {/* Transaction Type Icon and Amount */}
           <div className="text-center space-y-3">
             <div className="flex justify-center">
               <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
@@ -217,7 +287,7 @@ export const TransactionReceipt = ({
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-bold">{getTransactionTypeLabel()}</h3>
+              <h3 className="text-xl font-bold text-white">{getTransactionTypeLabel()}</h3>
               <p className="text-3xl font-bold text-primary mt-2">
                 {transaction.type === 'withdrawal' ? '-' : '+'}{formatCurrency(transaction.amount)}
               </p>
@@ -233,32 +303,32 @@ export const TransactionReceipt = ({
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">ID da Transação</span>
-              <span className="font-mono text-xs">{transaction.id.slice(0, 16)}...</span>
+              <span className="font-mono text-xs text-white">{transaction.id}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Data e Hora</span>
-              <span className="text-sm">{formatDate(transaction.created_at)}</span>
+              <span className="text-sm text-white">{formatDate(transaction.created_at)}</span>
             </div>
 
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">
                 {transaction.type === 'withdrawal' ? 'Remetente' : 'Destinatário'}
               </span>
-              <span className="text-sm font-medium">{userName}</span>
+              <span className="text-sm font-medium text-white">{userName}</span>
             </div>
 
             {details && (
               <>
                 <Separator />
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-muted-foreground">
+                  <p className="text-sm font-medium text-primary">
                     {transaction.type === 'deposit' ? 'Dados do Remetente' : 'Dados do Destinatário'}
                   </p>
                   {Object.entries(details).map(([key, value]) => (
-                    <div key={key} className="flex justify-between items-center">
+                    <div key={key} className="flex justify-between items-start">
                       <span className="text-sm text-muted-foreground">{key}</span>
-                      <span className="text-sm font-medium text-right max-w-[60%] break-all">{value}</span>
+                      <span className="text-sm font-medium text-white text-right max-w-[60%] break-all">{value}</span>
                     </div>
                   ))}
                 </div>
@@ -270,7 +340,7 @@ export const TransactionReceipt = ({
                 <Separator />
                 <div>
                   <span className="text-sm text-muted-foreground">Referência</span>
-                  <p className="text-sm mt-1 break-all">{transaction.reference}</p>
+                  <p className="text-sm mt-1 break-all text-white">{transaction.reference}</p>
                 </div>
               </>
             )}
@@ -279,12 +349,15 @@ export const TransactionReceipt = ({
           <Separator />
 
           {/* Footer */}
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 pt-2">
             <p className="text-xs text-muted-foreground">
               Ganhos Bybit - Plataforma de Investimentos
             </p>
             <p className="text-xs text-muted-foreground">
               Comprovante gerado em {new Date().toLocaleString('pt-BR')}
+            </p>
+            <p className="text-xs text-primary font-medium">
+              www.ganhosbybit.com
             </p>
           </div>
         </div>
@@ -295,16 +368,26 @@ export const TransactionReceipt = ({
             variant="outline"
             className="flex-1"
             onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
           >
-            <Download className="h-4 w-4 mr-2" />
-            Baixar PDF
+            {isGeneratingPDF ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            {isGeneratingPDF ? 'Gerando...' : 'Baixar PDF'}
           </Button>
           <Button
             className="flex-1 gradient-gold"
             onClick={handleShare}
+            disabled={isSharing}
           >
-            <Share2 className="h-4 w-4 mr-2" />
-            Compartilhar
+            {isSharing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Share2 className="h-4 w-4 mr-2" />
+            )}
+            {isSharing ? 'Compartilhando...' : 'Compartilhar'}
           </Button>
         </div>
       </DialogContent>
