@@ -43,7 +43,7 @@ export const WithdrawalFeeSettings = () => {
     try {
       const amount = parseFloat(feeAmount);
       if (feeEnabled && (isNaN(amount) || amount <= 0)) {
-        toast.error('Por favor, insira um valor de taxa válido.');
+        toast.error('Please enter a valid fee amount.');
         return;
       }
 
@@ -58,7 +58,7 @@ export const WithdrawalFeeSettings = () => {
 
       if (error) throw error;
 
-      toast.success('Configurações de taxa atualizadas com sucesso!');
+      toast.success('Fee settings updated successfully!');
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -67,22 +67,22 @@ export const WithdrawalFeeSettings = () => {
   };
 
   return (
-    <Card>
+    <Card className="border-blue-200 bg-white">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Settings className="h-5 w-5" />
-          <CardTitle>Taxa de Saque</CardTitle>
+          <Settings className="h-5 w-5 text-blue-600" />
+          <CardTitle className="text-black">Withdrawal Fee</CardTitle>
         </div>
-        <CardDescription>
-          Configure a taxa adicional cobrada nos saques dos usuários
+        <CardDescription className="text-gray-500">
+          Configure the additional fee charged on user withdrawals
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="fee-enabled">Ativar Taxa de Saque</Label>
-            <p className="text-sm text-muted-foreground">
-              Exigir pagamento de taxa para processar saques
+            <Label htmlFor="fee-enabled" className="text-black">Enable Withdrawal Fee</Label>
+            <p className="text-sm text-gray-500">
+              Require fee payment to process withdrawals
             </p>
           </div>
           <Switch
@@ -95,7 +95,7 @@ export const WithdrawalFeeSettings = () => {
         {feeEnabled && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="fee-amount">Valor da Taxa (R$)</Label>
+              <Label htmlFor="fee-amount" className="text-black">Fee Amount (R$)</Label>
               <Input
                 id="fee-amount"
                 type="number"
@@ -104,21 +104,22 @@ export const WithdrawalFeeSettings = () => {
                 placeholder="Ex: 10.00"
                 value={feeAmount}
                 onChange={(e) => setFeeAmount(e.target.value)}
+                className="border-gray-300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fee-mode">Modo de Cobrança</Label>
+              <Label htmlFor="fee-mode" className="text-black">Fee Mode</Label>
               <Select value={feeMode} onValueChange={(v) => setFeeMode(v as 'deduct' | 'deposit')}>
-                <SelectTrigger id="fee-mode">
+                <SelectTrigger id="fee-mode" className="border-gray-300">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="deduct">
-                    Deduzir do Saldo - A taxa é descontada do saldo disponível
+                    Deduct from Balance - Fee is deducted from available balance
                   </SelectItem>
                   <SelectItem value="deposit">
-                    Depósito Separado - Usuário precisa depositar a taxa separadamente
+                    Separate Deposit - User needs to deposit the fee separately
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -126,8 +127,8 @@ export const WithdrawalFeeSettings = () => {
           </>
         )}
 
-        <Button onClick={handleSave} disabled={loading} className="w-full">
-          {loading ? 'Salvando...' : 'Salvar Configurações'}
+        <Button onClick={handleSave} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+          {loading ? 'Saving...' : 'Save Settings'}
         </Button>
       </CardContent>
     </Card>

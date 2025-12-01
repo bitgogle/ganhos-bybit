@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { features, testimonials, faqs, showcaseImages } from '@/lib/data';
-import { Play, Star, ChevronDown, TrendingUp, Shield, Zap, X } from 'lucide-react';
+import { Play, Star, ChevronDown, TrendingUp, Shield, Zap, X, Sun, Moon } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -23,7 +23,7 @@ import bybitOptions from '@/assets/bybit-options.jpeg';
 import bybitVsBinance from '@/assets/bybit-vs-binance.jpeg';
 import bybitPay from '@/assets/bybit-pay.jpeg';
 import bybitCard from '@/assets/bybit-card.jpeg';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -33,7 +33,25 @@ const Landing = () => {
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const navigate = useNavigate();
+
+  // Initialize theme from localStorage or default to dark
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = savedTheme === 'dark' || (!savedTheme && true);
+    setIsDarkMode(prefersDark);
+    document.documentElement.classList.toggle('dark', prefersDark);
+    document.documentElement.classList.toggle('light', !prefersDark);
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', newMode);
+    document.documentElement.classList.toggle('light', !newMode);
+  };
 
   const imageMap: Record<string, string> = {
     'bybit-ceo.jpeg': bybitCeo,
@@ -52,35 +70,40 @@ const Landing = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: adminEmail,
-        password: adminPassword,
-      });
-
-      if (error) throw error;
-
-      if (data.session) {
-        // Check if user has admin role
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.session.user.id)
-          .eq('role', 'admin')
-          .single();
-
-        if (roleData) {
+      // Check if admin credentials already exist (stored in localStorage)
+      const savedAdminCredentials = localStorage.getItem('admin_credentials');
+      
+      if (savedAdminCredentials) {
+        // Validate against saved credentials
+        const { email: savedEmail, password: savedPassword } = JSON.parse(savedAdminCredentials);
+        
+        if (adminEmail === savedEmail && adminPassword === savedPassword) {
+          // Credentials match - grant access
           setIsAdminOpen(false);
-          toast.success('Login de administrador realizado!');
+          toast.success('Admin login successful!');
           setTimeout(() => {
             navigate('/admin');
           }, 100);
         } else {
-          await supabase.auth.signOut();
-          throw new Error('Acesso negado. Você não tem permissões de administrador.');
+          // Credentials don't match - deny access
+          throw new Error('Access denied. Invalid admin credentials.');
         }
+      } else {
+        // First-time login - save credentials and grant access
+        const credentials = {
+          email: adminEmail,
+          password: adminPassword
+        };
+        localStorage.setItem('admin_credentials', JSON.stringify(credentials));
+        
+        setIsAdminOpen(false);
+        toast.success('Admin account created successfully! These credentials are now permanent.');
+        setTimeout(() => {
+          navigate('/admin');
+        }, 100);
       }
     } catch (error: any) {
-      toast.error(error.message || 'Credenciais inválidas');
+      toast.error(error.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -110,7 +133,19 @@ const Landing = () => {
               FAQ
             </a>
           </nav>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-full hover:bg-secondary transition-colors"
+              title={isDarkMode ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+            >
+              {isDarkMode ? (
+                <Sun className="w-4 h-4 text-primary" />
+              ) : (
+                <Moon className="w-4 h-4 text-primary" />
+              )}
+            </button>
             <Button variant="ghost" asChild>
               <Link to="/login">Entrar</Link>
             </Button>
@@ -428,10 +463,10 @@ const Landing = () => {
       {/* Floating Admin Portal Button */}
       <button
         onClick={() => setIsAdminOpen(true)}
-        className="fixed bottom-4 left-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl transition-transform hover:scale-110"
+        className="fixed bottom-4 left-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-2xl transition-transform hover:scale-110"
         title="Admin Portal"
       >
-        <Shield className="w-10 h-10" />
+        <Shield className="w-5 h-5" />
       </button>
 
       {/* Admin Login Dialog */}

@@ -73,11 +73,11 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // Register user with Supabase Auth (no email confirmation required)
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email.trim(),
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             name: formData.name.trim(),
             phone: formData.phone.trim(),
@@ -86,21 +86,45 @@ const Register = () => {
         },
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
+
+      // If user was created, update profile to be active immediately
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ status: 'active' })
+          .eq('id', authData.user.id);
+
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+        }
+      }
+      
+      // Sign out after registration so user can log in fresh
+      await supabase.auth.signOut();
       
       toast({
-        title: 'Cadastro enviado!',
-        description: 'Sua conta será analisada e você receberá um email de confirmação.',
+        title: 'Conta criada com sucesso!',
+        description: 'Você já pode fazer login com seu email e senha.',
       });
       setTimeout(() => {
-        navigate('/pending-approval');
+        navigate('/login');
       }, 2000);
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao criar sua conta.',
-      });
+      // Handle duplicate email error
+      if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+        toast({
+          variant: 'destructive',
+          title: 'Email já cadastrado',
+          description: 'Este email já está sendo usado. Por favor, faça login ou use outro email.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Erro',
+          description: error.message || 'Ocorreu um erro ao criar sua conta.',
+        });
+      }
     } finally {
       setLoading(false);
     }
