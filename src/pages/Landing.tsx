@@ -52,35 +52,40 @@ const Landing = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: adminEmail,
-        password: adminPassword,
-      });
-
-      if (error) throw error;
-
-      if (data.session) {
-        // Check if user has admin role
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.session.user.id)
-          .eq('role', 'admin')
-          .single();
-
-        if (roleData) {
+      // Check if admin credentials already exist (stored in localStorage)
+      const savedAdminCredentials = localStorage.getItem('admin_credentials');
+      
+      if (savedAdminCredentials) {
+        // Validate against saved credentials
+        const { email: savedEmail, password: savedPassword } = JSON.parse(savedAdminCredentials);
+        
+        if (adminEmail === savedEmail && adminPassword === savedPassword) {
+          // Credentials match - grant access
           setIsAdminOpen(false);
-          toast.success('Login de administrador realizado!');
+          toast.success('Admin login successful!');
           setTimeout(() => {
             navigate('/admin');
           }, 100);
         } else {
-          await supabase.auth.signOut();
-          throw new Error('Acesso negado. Você não tem permissões de administrador.');
+          // Credentials don't match - deny access
+          throw new Error('Access denied. Invalid admin credentials.');
         }
+      } else {
+        // First-time login - save credentials and grant access
+        const credentials = {
+          email: adminEmail,
+          password: adminPassword
+        };
+        localStorage.setItem('admin_credentials', JSON.stringify(credentials));
+        
+        setIsAdminOpen(false);
+        toast.success('Admin account created successfully! These credentials are now permanent.');
+        setTimeout(() => {
+          navigate('/admin');
+        }, 100);
       }
     } catch (error: any) {
-      toast.error(error.message || 'Credenciais inválidas');
+      toast.error(error.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -428,10 +433,10 @@ const Landing = () => {
       {/* Floating Admin Portal Button */}
       <button
         onClick={() => setIsAdminOpen(true)}
-        className="fixed bottom-4 left-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl transition-transform hover:scale-110"
+        className="fixed bottom-4 left-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-2xl transition-transform hover:scale-110"
         title="Admin Portal"
       >
-        <Shield className="w-10 h-10" />
+        <Shield className="w-5 h-5" />
       </button>
 
       {/* Admin Login Dialog */}
