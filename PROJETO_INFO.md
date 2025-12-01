@@ -85,13 +85,13 @@ A aplicação utiliza **localStorage** do navegador para armazenar:
 - Configurações da plataforma
 - Sessão do usuário logado
 
-**Nota**: Para produção, recomenda-se integrar com Lovable Cloud/Supabase para persistência de dados real.
+**Nota**: Para produção, recomenda-se integrar com Supabase para persistência de dados real.
 
 ## 🎯 Próximos Passos Recomendados
 
 Para transformar em uma aplicação de produção:
 
-1. **Ativar Lovable Cloud** para backend real
+1. **Configurar Supabase** para backend real
 2. **Criar tabelas no banco de dados**:
    - users
    - transactions
@@ -138,4 +138,4 @@ Para transformar em uma aplicação de produção:
 
 ---
 
-**Desenvolvido com Lovable** 💛
+**Desenvolvido com ❤️**

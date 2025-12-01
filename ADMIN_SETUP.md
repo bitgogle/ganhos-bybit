@@ -12,9 +12,9 @@
 
 After successfully registering, you need to set this user as an admin in the database.
 
-### Option A: Using Lovable Cloud Backend
+### Option A: Using Supabase Dashboard
 
-1. Click "View Backend" in Lovable
+1. Open the Supabase Dashboard for your project
 2. Navigate to the SQL Editor
 3. First, find the user ID by running:
    ```sql
