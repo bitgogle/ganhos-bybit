@@ -1,106 +1,110 @@
-# Welcome to your Lovable project
+# Ganhos Bybit - Plataforma de Investimentos em Criptomoedas
 
-## Project info
+Uma plataforma completa de investimentos em criptomoedas com painel administrativo e dashboard de usuário.
 
-**URL**: https://lovable.dev/projects/1fa48699-dd02-46b7-8d8e-78d89520d588
+## 🌟 Funcionalidades
 
-## How can I edit this code?
+### Para Usuários:
+- Landing page com informações sobre planos de investimento
+- Sistema de registro com aprovação administrativa
+- Dashboard completo com visualização de saldo e estatísticas
+- Planos de investimento de R$ 200 a R$ 5.000
+- Sistema de depósitos via PIX, Bybit UID e USDT
+- Sistema de saques com taxas configuráveis
+- Histórico completo de transações
+- Notificações em tempo real
 
-There are several ways of editing your application.
+### Para Administradores:
+- Painel administrativo completo
+- Dashboard com estatísticas em tempo real
+- Gestão de usuários (aprovar/rejeitar/restringir)
+- Gestão de transações (aprovar/rejeitar depósitos e saques)
+- Configurações da plataforma (PIX, Bybit UID, USDT)
+- Configuração de taxas de saque
 
-**Use Lovable**
+## 📱 Como editar este código
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1fa48699-dd02-46b7-8d8e-78d89520d588) and start prompting.
+### Usando seu IDE preferido
 
-Changes made via Lovable will be committed automatically to this repo.
+Clone o repositório e faça suas alterações localmente.
 
-**Use your preferred IDE**
+O único requisito é ter Node.js e npm instalados - [instale com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Siga estes passos:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Passo 1: Clone o repositório
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Passo 2: Navegue para o diretório do projeto
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Passo 3: Instale as dependências
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Passo 4: Inicie o servidor de desenvolvimento
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Editar arquivo diretamente no GitHub
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Navegue até o(s) arquivo(s) desejado(s).
+- Clique no botão "Edit" (ícone de lápis) no canto superior direito da visualização do arquivo.
+- Faça suas alterações e confirme.
 
-**Use GitHub Codespaces**
+### Usar GitHub Codespaces
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Navegue até a página principal do seu repositório.
+- Clique no botão "Code" (botão verde) perto do canto superior direito.
+- Selecione a aba "Codespaces".
+- Clique em "New codespace" para iniciar um novo ambiente Codespace.
+- Edite arquivos diretamente no Codespace e confirme suas alterações quando terminar.
 
-## What technologies are used for this project?
+## 🛠️ Tecnologias utilizadas
 
-This project is built with:
+Este projeto é construído com:
 
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (autenticação e banco de dados)
 
-## How can I deploy this project?
+## 🚀 Como fazer deploy
 
-### Option 1: Deploy via Lovable
-Simply open [Lovable](https://lovable.dev/projects/1fa48699-dd02-46b7-8d8e-78d89520d588) and click on Share -> Publish.
+### Deploy no Vercel
 
-### Option 2: Deploy to Vercel Production
+Este projeto inclui um workflow de GitHub Actions para deploy automático no Vercel. Para configurar:
 
-This project includes a GitHub Actions workflow for automatic deployment to Vercel. To set it up:
+1. **Crie uma conta Vercel** em [vercel.com](https://vercel.com) se ainda não tiver uma.
 
-1. **Create a Vercel account** at [vercel.com](https://vercel.com) if you don't have one.
+2. **Vincule seu projeto ao Vercel**:
+   - Vá para o dashboard do Vercel e clique em "Add New Project"
+   - Importe este repositório GitHub
+   - Configure as configurações do projeto (elas devem ser detectadas automaticamente de `vercel.json`)
 
-2. **Link your project to Vercel**:
-   - Go to Vercel dashboard and click "Add New Project"
-   - Import this GitHub repository
-   - Configure the project settings (they should auto-detect from `vercel.json`)
+3. **Configure Variáveis de Ambiente no Vercel**:
+   Vá para as Configurações do seu projeto Vercel > Environment Variables e adicione:
+   - `VITE_SUPABASE_URL` - Sua URL do Supabase
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` - Sua chave anon do Supabase
+   - `VITE_SUPABASE_PROJECT_ID` - ID do seu projeto Supabase
 
-3. **Configure Environment Variables in Vercel**:
-   Go to your Vercel project Settings > Environment Variables and add:
-   - `VITE_SUPABASE_URL` - Your Supabase URL
-   - `VITE_SUPABASE_PUBLISHABLE_KEY` - Your Supabase anon key
-   - `VITE_SUPABASE_PROJECT_ID` - Your Supabase project ID
+4. **Obtenha suas credenciais do Vercel para GitHub Actions**:
+   - **VERCEL_TOKEN**: Vá para Vercel Settings > Tokens > Create Token
+   - **VERCEL_ORG_ID**: Encontrado em Vercel Settings > General > Your ID
+   - **VERCEL_PROJECT_ID**: Encontrado em Settings do seu projeto > General > Project ID
 
-4. **Get your Vercel credentials for GitHub Actions**:
-   - **VERCEL_TOKEN**: Go to Vercel Settings > Tokens > Create Token
-   - **VERCEL_ORG_ID**: Found in Vercel Settings > General > Your ID
-   - **VERCEL_PROJECT_ID**: Found in your project's Settings > General > Project ID
-
-5. **Add GitHub Secrets**:
-   Go to your GitHub repository Settings > Secrets and variables > Actions, and add:
+5. **Adicione GitHub Secrets**:
+   Vá para Settings > Secrets and variables > Actions do seu repositório GitHub, e adicione:
    - `VERCEL_TOKEN`
    - `VERCEL_ORG_ID`
    - `VERCEL_PROJECT_ID`
 
 6. **Deploy**: 
-   - Push to `main` branch for automatic deployment
-   - Or go to Actions tab and manually trigger the "Deploy to Vercel Production" workflow
+   - Faça push para a branch `main` para deploy automático
+   - Ou vá para a aba Actions e dispare manualmente o workflow "Deploy to Vercel Production"
 
-## Can I connect a custom domain to my Lovable project?
+## 🌐 Conectar um domínio personalizado
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Para conectar um domínio, navegue até o dashboard do Vercel > seu projeto > Settings > Domains e clique em Add Domain.

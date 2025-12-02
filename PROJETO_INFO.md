@@ -9,44 +9,34 @@ Plataforma completa de investimentos em criptomoedas com painel administrativo.
 - ✅ **Sistema de Cadastro** com aprovação administrativa
 - ✅ **Dashboard Completo** com:
   - Visualização de saldo e estatísticas
-  - Planos de investimento (Iniciante, Profissional, Premium)
-  - Sistema de depósitos via PIX
+  - Planos de investimento (R$ 200 a R$ 5.000)
+  - Sistema de depósitos via PIX, Bybit UID e USDT
   - Sistema de saques com taxas configuráveis
   - Histórico completo de transações
+  - Notificações em tempo real
 - ✅ **Estados de Conta**:
   - Pendente de aprovação
   - Aprovada/Ativa
   - Rejeitada
 
-### Para Administradores (Interface em Inglês):
+### Para Administradores:
 - ✅ **Painel Administrativo Completo**:
   - Dashboard com estatísticas em tempo real
   - Gestão de usuários (aprovar/rejeitar cadastros)
   - Gestão de transações (aprovar/rejeitar depósitos e saques)
-  - Edição de saldos de usuários
-  - Configurações da plataforma (PIX, taxas, limites)
+  - Configurações da plataforma (PIX, Bybit UID, USDT)
+  - Configuração de taxas de saque
 
 ## 🔐 Acesso Administrativo
 
-**Email:** admin@bybit.com  
-**Senha:** admin123
+Consulte o arquivo `ADMIN_SETUP.md` para instruções de configuração do administrador.
 
 ## 💳 Planos de Investimento
 
-### Plano Iniciante
-- Investimento: R$ 100 - R$ 999
-- Retorno diário: 1.5%
-- Retorno mensal: até 45%
-
-### Plano Profissional
-- Investimento: R$ 1.000 - R$ 4.999
-- Retorno diário: 2.0%
-- Retorno mensal: até 60%
-
-### Plano Premium
-- Investimento: R$ 5.000+
-- Retorno diário: 2.5%
-- Retorno mensal: até 75%
+- Investimentos de R$ 200 a R$ 5.000 em incrementos de R$ 100
+- Lucro: R$ 20 para cada R$ 100 investidos (a cada 3 horas)
+- Duração personalizável: 1 a 7 dias
+- 8 distribuições de lucro por dia
 
 ## 🎨 Design
 
@@ -64,6 +54,7 @@ Plataforma completa de investimentos em criptomoedas com painel administrativo.
 5. **/pending-approval** - Página de aguardo de aprovação
 6. **/rejected** - Página de cadastro rejeitado
 7. **/admin** - Painel administrativo (requer login admin)
+8. **/fee-payment/:id** - Página de pagamento de taxa
 
 ## 🔄 Fluxo de Usuário
 
@@ -71,7 +62,7 @@ Plataforma completa de investimentos em criptomoedas com painel administrativo.
 2. **Pendente**: Conta fica pendente de aprovação administrativa
 3. **Aprovação**: Admin aprova ou rejeita o cadastro
 4. **Dashboard**: Usuário acessa dashboard e visualiza planos
-5. **Depósito**: Usuário solicita depósito via PIX
+5. **Depósito**: Usuário solicita depósito via PIX/Bybit/USDT
 6. **Aprovação de Depósito**: Admin aprova o depósito
 7. **Investimento Ativo**: Saldo é creditado e começa a render
 8. **Saque**: Usuário pode solicitar saque a qualquer momento
@@ -79,41 +70,18 @@ Plataforma completa de investimentos em criptomoedas com painel administrativo.
 
 ## 💾 Armazenamento de Dados
 
-A aplicação utiliza **localStorage** do navegador para armazenar:
-- Lista de usuários cadastrados
-- Transações realizadas
-- Configurações da plataforma
-- Sessão do usuário logado
-
-**Nota**: Para produção, recomenda-se integrar com Lovable Cloud/Supabase para persistência de dados real.
-
-## 🎯 Próximos Passos Recomendados
-
-Para transformar em uma aplicação de produção:
-
-1. **Ativar Lovable Cloud** para backend real
-2. **Criar tabelas no banco de dados**:
-   - users
-   - transactions
-   - platform_settings
-3. **Implementar autenticação real** com Supabase Auth
-4. **Adicionar upload de comprovantes** de depósito
-5. **Integrar API de pagamentos** (PIX real)
-6. **Adicionar notificações por email**
-7. **Implementar sistema de 2FA** para segurança
+A aplicação utiliza **Supabase** para:
+- Autenticação de usuários
+- Banco de dados PostgreSQL
+- Armazenamento de comprovantes
+- Atualizações em tempo real
 
 ## 🛡️ Segurança
 
-⚠️ **IMPORTANTE**: Esta é uma aplicação de demonstração. Para uso em produção:
-
-- Não use senhas em texto plano
-- Implemente hash de senhas (bcrypt)
-- Use autenticação JWT ou OAuth
-- Adicione validação de dados robusta
-- Implemente rate limiting
-- Use HTTPS obrigatoriamente
-- Adicione logs de auditoria
-- Configure CORS adequadamente
+- Autenticação segura via Supabase Auth
+- Controle de acesso baseado em roles (admin/user)
+- Validação de dados com Zod
+- Proteção de rotas sensíveis
 
 ## 📊 Tecnologias Utilizadas
 
@@ -123,6 +91,7 @@ Para transformar em uma aplicação de produção:
 - **Shadcn UI** - Componentes de UI
 - **React Router** - Roteamento
 - **React Context** - Gerenciamento de estado
+- **Supabase** - Backend e autenticação
 - **Lucide Icons** - Ícones
 - **Vite** - Build tool
 
@@ -130,12 +99,13 @@ Para transformar em uma aplicação de produção:
 
 1. Acesse a landing page
 2. Crie uma nova conta de usuário
-3. Faça login como admin para aprovar
-4. Volte ao login de usuário
-5. Explore o dashboard e funcionalidades
-6. Teste depósitos e saques
-7. Aprove transações como admin
+3. Configure um admin (ver ADMIN_SETUP.md)
+4. Faça login como admin para aprovar a conta
+5. Volte ao login de usuário
+6. Explore o dashboard e funcionalidades
+7. Teste depósitos e saques
+8. Aprove transações como admin
 
 ---
 
-**Desenvolvido com Lovable** 💛
+**Ganhos Bybit** - Plataforma de Investimentos em Criptomoedas
