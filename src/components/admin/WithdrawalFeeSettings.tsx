@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
 
 export const WithdrawalFeeSettings = () => {
   const [loading, setLoading] = useState(false);
@@ -33,7 +34,7 @@ export const WithdrawalFeeSettings = () => {
         setFeeAmount(data.withdrawal_fee_amount?.toString() || '');
         setFeeMode((data.withdrawal_fee_mode as 'deduct' | 'deposit') || 'deduct');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching fee settings:', err);
     }
   };
@@ -58,9 +59,9 @@ export const WithdrawalFeeSettings = () => {
 
       if (error) throw error;
 
-      toast.success('Fee settings updated successfully!');
-    } catch (err: any) {
-      toast.error(err.message);
+      toast.success('Configurações de taxa atualizadas com sucesso!');
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

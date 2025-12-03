@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Upload, AlertCircle, CheckCircle, XCircle, Copy, ArrowLeft } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { getErrorMessage } from '@/lib/utils';
 import { SystemSettings, FeeRequest } from '@/context/AppContext';
 import { toast } from 'sonner';
 
@@ -117,8 +118,8 @@ const FeePayment = () => {
 
       toast.success('Comprovante enviado com sucesso! Aguarde a aprovação do administrador.');
       fetchFeeRequest();
-    } catch (err: any) {
-      toast.error(err.message || 'Erro ao enviar comprovante.');
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err) || 'Erro ao enviar comprovante.');
     } finally {
       setLoading(false);
     }

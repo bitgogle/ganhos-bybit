@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { UserX, UserCheck } from 'lucide-react';
 import { Profile } from '@/context/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
 
 interface UserRestrictionManagerProps {
   user: Profile;
@@ -41,8 +41,8 @@ export const UserRestrictionManager = ({ user, onUpdate }: UserRestrictionManage
       toast.success(newRestricted ? 'User restricted successfully!' : 'Restriction removed successfully!');
       setConfirmOpen(false);
       onUpdate();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

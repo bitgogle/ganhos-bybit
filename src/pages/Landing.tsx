@@ -27,6 +27,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
 
 const Landing = () => {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -102,8 +103,8 @@ const Landing = () => {
           navigate('/admin');
         }, 100);
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Invalid credentials');
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error) || 'Credenciais inválidas');
     } finally {
       setLoading(false);
     }

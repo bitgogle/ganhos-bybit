@@ -9,6 +9,7 @@ import { TrendingUp, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import { getErrorMessage } from '@/lib/utils';
 
 const registerSchema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres').max(100, 'Nome muito longo'),
@@ -110,21 +111,12 @@ const Register = () => {
       setTimeout(() => {
         navigate('/login');
       }, 2000);
-    } catch (error: any) {
-      // Handle duplicate email error
-      if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
-        toast({
-          variant: 'destructive',
-          title: 'Email já cadastrado',
-          description: 'Este email já está sendo usado. Por favor, faça login ou use outro email.',
-        });
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro',
-          description: error.message || 'Ocorreu um erro ao criar sua conta.',
-        });
-      }
+    } catch (error: unknown) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: getErrorMessage(error) || 'Ocorreu um erro ao criar sua conta.',
+      });
     } finally {
       setLoading(false);
     }

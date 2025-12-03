@@ -39,6 +39,19 @@ import { WithdrawalFeeSettings } from '@/components/admin/WithdrawalFeeSettings'
 import { Profile, Transaction, SystemSettings } from '@/context/AppContext';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
+
+interface TransactionWithProfile {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: string;
+  status: string;
+  reference?: string;
+  proof_url?: string;
+  created_at: string;
+  profiles?: { name: string; email: string } | null;
+}
 
 const Admin = () => {
   const { logout } = useApp();
@@ -89,7 +102,7 @@ const Admin = () => {
       // Fetch user names for transactions
       if (txRes.data) {
         const enrichedTx = await Promise.all(
-          txRes.data.map(async (tx: any) => {
+          txRes.data.map(async (tx: TransactionWithProfile) => {
             const { data: userData } = await supabase
               .from('profiles')
               .select('name, email')
@@ -159,8 +172,8 @@ const Admin = () => {
 
       toast.success('Usuário aprovado com sucesso!');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -186,8 +199,8 @@ const Admin = () => {
 
       toast.success('Usuário rejeitado.');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -243,8 +256,8 @@ const Admin = () => {
 
       toast.success('Transação aprovada!');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -284,8 +297,8 @@ const Admin = () => {
 
       toast.success('Transação rejeitada.');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -310,8 +323,8 @@ const Admin = () => {
 
       toast.success('Configurações atualizadas com sucesso!');
       fetchData();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -352,8 +365,8 @@ const Admin = () => {
       setIsEditingBalance(false);
       fetchData();
       setSelectedUser(null);
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

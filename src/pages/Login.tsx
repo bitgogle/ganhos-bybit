@@ -8,6 +8,7 @@ import { useApp } from '@/context/AppContext';
 import { TrendingUp, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getErrorMessage } from '@/lib/utils';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -61,11 +62,11 @@ const Login = () => {
         // Admin panel is only accessible via the admin authentication page (floating shield button on landing page)
         navigate('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: 'Erro no login',
-        description: error.message || 'Email ou senha incorretos.',
+        description: getErrorMessage(error) || 'Email ou senha incorretos.',
       });
     } finally {
       setLoading(false);
