@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    /* Dark theme (default) */
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
 
@@ -59,6 +60,52 @@
     --bybit-gold-hover: 34 90% 48%;
     --bybit-secondary: 0 0% 16.5%;
     --bybit-card-hover: 0 0% 17.5%;
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 10%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+ 
+    --primary: 34 98% 53%;
+    --primary-foreground: 0 0% 100%;
+ 
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 0 0% 10%;
+ 
+    --muted: 0 0% 50%;
+    --muted-foreground: 0 0% 40%;
+ 
+    --accent: 34 98% 53%;
+    --accent-foreground: 0 0% 100%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 34 98% 53%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 34 98% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 92%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 85%;
+    --sidebar-ring: 34 98% 53%;
+
+    /* Bybit specific colors for light mode */
+    --bybit-black: 0 0% 100%;
+    --bybit-card: 0 0% 98%;
+    --bybit-border: 0 0% 85%;
+    --bybit-secondary: 0 0% 92%;
+    --bybit-card-hover: 0 0% 95%;
   }
 
   .dark {

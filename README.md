@@ -1,73 +1,133 @@
-# Welcome to your Lovable project
+# Ganhos Bybit
 
-## Project info
+A cryptocurrency investment platform with an administrative panel. The user interface is in Portuguese (Brazilian), while the admin interface is in English.
 
-**URL**: https://lovable.dev/projects/1fa48699-dd02-46b7-8d8e-78d89520d588
+## Features
 
-## How can I edit this code?
+### User Features (Portuguese Interface)
 
-There are several ways of editing your application.
+- **Landing Page** - Attractive landing page with investment plan information
+- **User Registration** - Account creation with administrative approval system
+- **User Dashboard** - Complete dashboard with:
+  - Balance and statistics visualization
+  - Investment plans (Starter, Professional, Premium)
+  - PIX deposit system
+  - Withdrawal system with configurable fees
+  - Complete transaction history
+- **Account States**:
+  - Pending approval
+  - Approved/Active
+  - Rejected
 
-**Use Lovable**
+### Admin Features (English Interface)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1fa48699-dd02-46b7-8d8e-78d89520d588) and start prompting.
+- **Admin Dashboard** - Complete administrative panel with:
+  - Real-time statistics
+  - User management (approve/reject registrations)
+  - Transaction management (approve/reject deposits and withdrawals)
+  - User balance editing
+  - Platform settings (PIX, fees, limits)
 
-Changes made via Lovable will be committed automatically to this repo.
+## Investment Plans
 
-**Use your preferred IDE**
+| Plan | Investment Range | Daily Return | Monthly Return |
+|------|------------------|--------------|----------------|
+| Starter | R$ 100 - R$ 999 | 1.5% | up to 45% |
+| Professional | R$ 1,000 - R$ 4,999 | 2.0% | up to 60% |
+| Premium | R$ 5,000+ | 2.5% | up to 75% |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Tech Stack
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **State Management**: React Context + TanStack React Query
+- **Routing**: React Router DOM
+- **Database**: Supabase
+- **Forms**: React Hook Form with Zod validation
+- **Icons**: Lucide React
 
-Follow these steps:
+## Getting Started
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Prerequisites
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- Node.js 18+ and npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Installation
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+# Clone the repository
+git clone https://github.com/bitgogle/ganhos-bybit.git
+
+# Navigate to the project directory
+cd ganhos-bybit
+
+# Install dependencies
+npm install
+
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Available Scripts
 
-**Use GitHub Codespaces**
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run build:dev` | Build for development |
+| `npm run lint` | Run ESLint |
+| `npm run preview` | Preview production build |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Application Routes
 
-## What technologies are used for this project?
+| Route | Description |
+|-------|-------------|
+| `/` | Public landing page |
+| `/login` | User and admin login |
+| `/register` | New user registration |
+| `/dashboard` | User dashboard (requires login) |
+| `/pending-approval` | Approval waiting page |
+| `/rejected` | Registration rejected page |
+| `/admin` | Admin panel (requires admin login) |
 
-This project is built with:
+## Project Structure
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+src/
+├── components/       # Reusable UI components
+│   ├── ui/           # shadcn/ui components
+│   ├── admin/        # Admin panel components
+│   └── withdrawal/   # Withdrawal-related components
+├── context/          # React Context providers
+├── hooks/            # Custom React hooks
+├── integrations/     # External service integrations (Supabase)
+├── lib/              # Utility functions
+├── pages/            # Page components
+└── assets/           # Static assets
+```
 
-## How can I deploy this project?
+## Design
 
-Simply open [Lovable](https://lovable.dev/projects/1fa48699-dd02-46b7-8d8e-78d89520d588) and click on Share -> Publish.
+- **Primary Colors**: Black (#0a0a0a) and Gold (#f7931a)
+- **Theme**: Elegant and professional dark mode
+- **Responsive**: Fully adaptable for mobile, tablet, and desktop
+- **Animations**: Smooth transitions and modern visual effects
 
-## Can I connect a custom domain to my Lovable project?
+## User Flow
 
-Yes, you can!
+1. **Registration**: User registers with personal data
+2. **Pending**: Account is pending administrative approval
+3. **Approval**: Admin approves or rejects the registration
+4. **Dashboard**: User accesses dashboard and views plans
+5. **Deposit**: User requests deposit via PIX
+6. **Deposit Approval**: Admin approves the deposit
+7. **Active Investment**: Balance is credited and starts earning
+8. **Withdrawal**: User can request withdrawal at any time
+9. **Processing**: Admin processes and approves the withdrawal
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This project is private and proprietary.

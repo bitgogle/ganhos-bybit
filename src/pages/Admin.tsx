@@ -54,7 +54,7 @@ interface TransactionWithProfile {
 }
 
 const Admin = () => {
-  const { isAdmin, logout } = useApp();
+  const { logout } = useApp();
   const navigate = useNavigate();
   const [users, setUsers] = useState<Profile[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -76,11 +76,17 @@ const Admin = () => {
   const [bybitUid, setBybitUid] = useState('');
   const [usdtAddress, setUsdtAddress] = useState('');
 
+  // Check for admin credentials in localStorage
+  const hasAdminAccess = () => {
+    const savedCredentials = localStorage.getItem('admin_credentials');
+    return !!savedCredentials;
+  };
+
   useEffect(() => {
-    if (!isAdmin) {
-      navigate('/login');
+    if (!hasAdminAccess()) {
+      navigate('/');
     }
-  }, [isAdmin, navigate]);
+  }, [navigate]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -123,12 +129,12 @@ const Admin = () => {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) fetchData();
-  }, [isAdmin, fetchData]);
+    if (hasAdminAccess()) fetchData();
+  }, [fetchData]);
 
   // Realtime subscriptions
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!hasAdminAccess()) return;
 
     const profilesChannel = supabase
       .channel('admin_profiles')
@@ -144,7 +150,7 @@ const Admin = () => {
       supabase.removeChannel(profilesChannel);
       supabase.removeChannel(txChannel);
     };
-  }, [isAdmin, fetchData]);
+  }, [fetchData]);
 
   const handleApproveUser = async (userId: string) => {
     setLoading(true);
@@ -371,7 +377,7 @@ const Admin = () => {
     navigate('/');
   };
 
-  if (!isAdmin) return null;
+  if (!hasAdminAccess()) return null;
 
   const pendingUsers = users.filter(u => u.status === 'pending');
   const activeUsers = users.filter(u => u.status === 'active');
@@ -385,15 +391,15 @@ const Admin = () => {
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50">
+    <div className="min-h-screen bg-white">
+      <header className="border-b border-gray-200 bg-blue-600">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Ganhos Bybit</span>
-            <Badge variant="secondary" className="ml-2">Admin</Badge>
+            <TrendingUp className="h-6 w-6 text-white" />
+            <span className="text-xl font-bold text-white">Ganhos Bybit</span>
+            <Badge className="ml-2 bg-white text-blue-600">Admin</Badge>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white hover:bg-blue-700">
             <LogOut className="h-4 w-4 mr-2" />
             Logout
           </Button>
@@ -402,60 +408,60 @@ const Admin = () => {
 
       <main className="container py-8 px-4">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Gerencie usuários, transações e configurações da plataforma</p>
+          <h1 className="text-3xl font-bold mb-2 text-black">Admin Dashboard</h1>
+          <p className="text-gray-600">Manage users, transactions and platform settings</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <Card>
+          <Card className="border-blue-200 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-black">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{users.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {activeUsers.length} ativos, {pendingUsers.length} pendentes
+              <div className="text-2xl font-bold text-black">{users.length}</div>
+              <p className="text-xs text-gray-500 mt-1">
+                {activeUsers.length} active, {pendingUsers.length} pending
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-blue-200 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Transações Pendentes</CardTitle>
-              <Activity className="h-4 w-4 text-warning" />
+              <CardTitle className="text-sm font-medium text-black">Pending Transactions</CardTitle>
+              <Activity className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-warning">{pendingTransactions.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Requerem atenção
+              <div className="text-2xl font-bold text-yellow-500">{pendingTransactions.length}</div>
+              <p className="text-xs text-gray-500 mt-1">
+                Require attention
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-blue-200 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Depositado</CardTitle>
-              <ArrowDownCircle className="h-4 w-4 text-success" />
+              <CardTitle className="text-sm font-medium text-black">Total Deposited</CardTitle>
+              <ArrowDownCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-success">{formatCurrency(totalDeposits)}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Depósitos aprovados
+              <div className="text-2xl font-bold text-green-500">{formatCurrency(totalDeposits)}</div>
+              <p className="text-xs text-gray-500 mt-1">
+                Approved deposits
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-blue-200 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Sacado</CardTitle>
-              <ArrowUpCircle className="h-4 w-4 text-destructive" />
+              <CardTitle className="text-sm font-medium text-black">Total Withdrawn</CardTitle>
+              <ArrowUpCircle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-destructive">{formatCurrency(totalWithdrawals)}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Saques aprovados
+              <div className="text-2xl font-bold text-red-500">{formatCurrency(totalWithdrawals)}</div>
+              <p className="text-xs text-gray-500 mt-1">
+                Approved withdrawals
               </p>
             </CardContent>
           </Card>
@@ -463,81 +469,81 @@ const Admin = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="users" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="users">
-              Gerenciar Usuários
+          <TabsList className="bg-blue-100">
+            <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Manage Users
               {pendingUsers.length > 0 && (
                 <Badge variant="destructive" className="ml-2">{pendingUsers.length}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="transactions">
-              Transações
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Transactions
               {pendingTransactions.length > 0 && (
                 <Badge variant="destructive" className="ml-2">{pendingTransactions.length}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="settings">
+            <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Settings className="h-4 w-4 mr-2" />
-              Configurações
+              Settings
             </TabsTrigger>
           </TabsList>
 
           {/* User Management Tab */}
           <TabsContent value="users">
-            <Card>
+            <Card className="border-blue-200 bg-white">
               <CardHeader>
-                <CardTitle>Gerenciamento de Usuários</CardTitle>
+                <CardTitle className="text-black">User Management</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>CPF</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Restrição</TableHead>
-                      <TableHead>Saldo</TableHead>
-                      <TableHead>Cadastro</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
+                      <TableHead className="text-black">Name</TableHead>
+                      <TableHead className="text-black">Email</TableHead>
+                      <TableHead className="text-black">CPF</TableHead>
+                      <TableHead className="text-black">Status</TableHead>
+                      <TableHead className="text-black">Restriction</TableHead>
+                      <TableHead className="text-black">Balance</TableHead>
+                      <TableHead className="text-black">Registered</TableHead>
+                      <TableHead className="text-right text-black">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {users.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                          Nenhum usuário encontrado
+                        <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                          No users found
                         </TableCell>
                       </TableRow>
                     ) : (
                       users.map((user) => (
                         <TableRow key={user.id}>
-                          <TableCell className="font-medium">{user.name}</TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell className="font-mono text-sm">{user.cpf}</TableCell>
+                          <TableCell className="font-medium text-black">{user.name}</TableCell>
+                          <TableCell className="text-black">{user.email}</TableCell>
+                          <TableCell className="font-mono text-sm text-black">{user.cpf}</TableCell>
                           <TableCell>
                             <Badge variant={
                               user.status === 'active' ? 'default' :
                               user.status === 'pending' ? 'secondary' :
                               'destructive'
-                            }>
-                              {user.status === 'active' ? 'Ativo' :
-                               user.status === 'pending' ? 'Pendente' :
-                               'Rejeitado'}
+                            } className={user.status === 'active' ? 'bg-green-500' : ''}>
+                              {user.status === 'active' ? 'Active' :
+                               user.status === 'pending' ? 'Pending' :
+                               'Rejected'}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             {user.restricted ? (
                               <Badge variant="destructive">
                                 <Shield className="h-3 w-3 mr-1" />
-                                Restrito
+                                Restricted
                               </Badge>
                             ) : (
-                              <Badge variant="outline">Normal</Badge>
+                              <Badge variant="outline" className="text-black border-gray-300">Normal</Badge>
                             )}
                           </TableCell>
-                          <TableCell>{formatCurrency(user.available_balance)}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
+                          <TableCell className="text-black">{formatCurrency(user.available_balance)}</TableCell>
+                          <TableCell className="text-sm text-gray-500">
                             {formatDate(user.created_at)}
                           </TableCell>
                           <TableCell className="text-right">
@@ -546,6 +552,7 @@ const Admin = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => setSelectedUser(user)}
+                                className="text-blue-600 hover:bg-blue-100"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -556,16 +563,18 @@ const Admin = () => {
                                     size="sm"
                                     onClick={() => handleApproveUser(user.id)}
                                     disabled={loading}
+                                    className="text-green-600 hover:bg-green-100"
                                   >
-                                    <UserCheck className="h-4 w-4 text-success" />
+                                    <UserCheck className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleRejectUser(user.id)}
                                     disabled={loading}
+                                    className="text-red-600 hover:bg-red-100"
                                   >
-                                    <UserX className="h-4 w-4 text-destructive" />
+                                    <UserX className="h-4 w-4" />
                                   </Button>
                                 </>
                               )}
@@ -585,28 +594,28 @@ const Admin = () => {
 
           {/* Transaction Management Tab */}
           <TabsContent value="transactions">
-            <Card>
+            <Card className="border-blue-200 bg-white">
               <CardHeader>
-                <CardTitle>Gerenciamento de Transações</CardTitle>
+                <CardTitle className="text-black">Transaction Management</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Usuário</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Detalhes</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
+                      <TableHead className="text-black">User</TableHead>
+                      <TableHead className="text-black">Type</TableHead>
+                      <TableHead className="text-black">Amount</TableHead>
+                      <TableHead className="text-black">Status</TableHead>
+                      <TableHead className="text-black">Date</TableHead>
+                      <TableHead className="text-black">Details</TableHead>
+                      <TableHead className="text-right text-black">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {transactions.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          Nenhuma transação encontrada
+                        <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                          No transactions found
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -614,40 +623,40 @@ const Admin = () => {
                         <TableRow key={tx.id}>
                           <TableCell>
                             <div>
-                              <p className="font-medium">{tx.profiles?.name}</p>
-                              <p className="text-xs text-muted-foreground">{tx.profiles?.email}</p>
+                              <p className="font-medium text-black">{tx.profiles?.name}</p>
+                              <p className="text-xs text-gray-500">{tx.profiles?.email}</p>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               {tx.type === 'deposit' ? (
-                                <ArrowDownCircle className="h-4 w-4 text-success" />
+                                <ArrowDownCircle className="h-4 w-4 text-green-500" />
                               ) : tx.type === 'withdrawal' ? (
-                                <ArrowUpCircle className="h-4 w-4 text-destructive" />
+                                <ArrowUpCircle className="h-4 w-4 text-red-500" />
                               ) : tx.type === 'investment' ? (
-                                <TrendingUp className="h-4 w-4 text-primary" />
+                                <TrendingUp className="h-4 w-4 text-blue-600" />
                               ) : (
-                                <DollarSign className="h-4 w-4 text-success" />
+                                <DollarSign className="h-4 w-4 text-green-500" />
                               )}
-                              <span className="capitalize">{tx.type}</span>
+                              <span className="capitalize text-black">{tx.type}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="font-bold">{formatCurrency(tx.amount)}</TableCell>
+                          <TableCell className="font-bold text-black">{formatCurrency(tx.amount)}</TableCell>
                           <TableCell>
                             <Badge variant={
                               tx.status === 'approved' || tx.status === 'completed' ? 'default' :
                               tx.status === 'pending' ? 'secondary' :
                               'destructive'
-                            }>
-                              {tx.status === 'approved' || tx.status === 'completed' ? 'Aprovado' :
-                               tx.status === 'pending' ? 'Pendente' :
-                               'Rejeitado'}
+                            } className={tx.status === 'approved' || tx.status === 'completed' ? 'bg-green-500' : ''}>
+                              {tx.status === 'approved' || tx.status === 'completed' ? 'Approved' :
+                               tx.status === 'pending' ? 'Pending' :
+                               'Rejected'}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
+                          <TableCell className="text-sm text-gray-500">
                             {formatDateTime(tx.created_at)}
                           </TableCell>
-                          <TableCell className="text-sm max-w-xs truncate">
+                          <TableCell className="text-sm max-w-xs truncate text-black">
                             {tx.reference}
                           </TableCell>
                           <TableCell className="text-right">
@@ -657,6 +666,7 @@ const Admin = () => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => window.open(tx.proof_url, '_blank')}
+                                  className="text-blue-600 hover:bg-blue-100"
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
@@ -668,16 +678,18 @@ const Admin = () => {
                                     size="sm"
                                     onClick={() => handleApproveTransaction(tx.id, tx)}
                                     disabled={loading}
+                                    className="text-green-600 hover:bg-green-100"
                                   >
-                                    <CheckCircle className="h-4 w-4 text-success" />
+                                    <CheckCircle className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleRejectTransaction(tx.id, tx)}
                                     disabled={loading}
+                                    className="text-red-600 hover:bg-red-100"
                                   >
-                                    <XCircle className="h-4 w-4 text-destructive" />
+                                    <XCircle className="h-4 w-4" />
                                   </Button>
                                 </>
                               )}
@@ -694,84 +706,89 @@ const Admin = () => {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card>
+            <Card className="border-blue-200 bg-white">
               <CardHeader>
-                <CardTitle>Configurações da Plataforma</CardTitle>
+                <CardTitle className="text-black">Platform Settings</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdateSettings} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="pix_key">Chave PIX para Depósitos</Label>
+                    <Label htmlFor="pix_key" className="text-black">PIX Key for Deposits</Label>
                     <Input
                       id="pix_key"
                       type="text"
-                      placeholder="Digite a chave PIX"
+                      placeholder="Enter PIX key"
                       value={pixKey}
                       onChange={(e) => setPixKey(e.target.value)}
+                      className="border-gray-300"
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Esta chave será exibida para os usuários ao fazer depósitos via PIX
+                    <p className="text-sm text-gray-500">
+                      This key will be shown to users when making PIX deposits
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pix_name">Nome para PIX</Label>
+                    <Label htmlFor="pix_name" className="text-black">PIX Account Name</Label>
                     <Input
                       id="pix_name"
                       type="text"
-                      placeholder="Digite o nome completo"
+                      placeholder="Enter full name"
                       value={pixName}
                       onChange={(e) => setPixName(e.target.value)}
+                      className="border-gray-300"
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Nome do titular da conta PIX
+                    <p className="text-sm text-gray-500">
+                      PIX account holder name
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pix_bank">Banco para PIX</Label>
+                    <Label htmlFor="pix_bank" className="text-black">PIX Bank</Label>
                     <Input
                       id="pix_bank"
                       type="text"
-                      placeholder="Digite o nome do banco"
+                      placeholder="Enter bank name"
                       value={pixBank}
                       onChange={(e) => setPixBank(e.target.value)}
+                      className="border-gray-300"
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Nome do banco da conta PIX
+                    <p className="text-sm text-gray-500">
+                      PIX account bank name
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bybit_uid">Bybit UID para Depósitos</Label>
+                    <Label htmlFor="bybit_uid" className="text-black">Bybit UID for Deposits</Label>
                     <Input
                       id="bybit_uid"
                       type="text"
-                      placeholder="Digite o Bybit UID"
+                      placeholder="Enter Bybit UID"
                       value={bybitUid}
                       onChange={(e) => setBybitUid(e.target.value)}
+                      className="border-gray-300"
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Este UID será exibido para os usuários ao fazer depósitos via Bybit
+                    <p className="text-sm text-gray-500">
+                      This UID will be shown to users when making Bybit deposits
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="usdt_address">Endereço USDT (TRC20) para Depósitos</Label>
+                    <Label htmlFor="usdt_address" className="text-black">USDT Address (TRC20) for Deposits</Label>
                     <Input
                       id="usdt_address"
                       type="text"
-                      placeholder="Digite o endereço USDT"
+                      placeholder="Enter USDT address"
                       value={usdtAddress}
                       onChange={(e) => setUsdtAddress(e.target.value)}
+                      className="border-gray-300"
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Este endereço será exibido para os usuários ao fazer depósitos via USDT
+                    <p className="text-sm text-gray-500">
+                      This address will be shown to users when making USDT deposits
                     </p>
                   </div>
 
-                  <Button type="submit" disabled={loading}>
-                    {loading ? 'Salvando...' : 'Salvar Configurações'}
+                  <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    {loading ? 'Saving...' : 'Save Settings'}
                   </Button>
                 </form>
               </CardContent>
@@ -788,47 +805,48 @@ const Admin = () => {
           setSelectedUser(null);
           setIsEditingBalance(false);
         }}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl bg-white">
             <DialogHeader>
-              <DialogTitle>Detalhes do Usuário</DialogTitle>
-              <DialogDescription>
-                Informações completas do usuário
+              <DialogTitle className="text-black">User Details</DialogTitle>
+              <DialogDescription className="text-gray-500">
+                Complete user information
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Nome</Label>
-                  <p className="font-medium">{selectedUser.name}</p>
+                  <Label className="text-gray-500">Name</Label>
+                  <p className="font-medium text-black">{selectedUser.name}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Email</Label>
-                  <p className="font-medium">{selectedUser.email}</p>
+                  <Label className="text-gray-500">Email</Label>
+                  <p className="font-medium text-black">{selectedUser.email}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Telefone</Label>
-                  <p className="font-medium">{selectedUser.phone || 'Não informado'}</p>
+                  <Label className="text-gray-500">Phone</Label>
+                  <p className="font-medium text-black">{selectedUser.phone || 'Not provided'}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">CPF</Label>
-                  <p className="font-medium font-mono">{selectedUser.cpf}</p>
+                  <Label className="text-gray-500">CPF</Label>
+                  <p className="font-medium font-mono text-black">{selectedUser.cpf}</p>
                 </div>
               </div>
               
               {/* Balance Section - Editable */}
               <div className="border-t pt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-base font-semibold">Saldos</Label>
+                  <Label className="text-base font-semibold text-black">Balances</Label>
                   {!isEditingBalance ? (
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleEditBalance(selectedUser)}
+                      className="border-blue-600 text-blue-600 hover:bg-blue-50"
                     >
                       <DollarSign className="h-4 w-4 mr-1" />
-                      Editar Saldos
+                      Edit Balances
                     </Button>
                   ) : (
                     <div className="flex gap-2">
@@ -837,15 +855,17 @@ const Admin = () => {
                         size="sm"
                         onClick={() => setIsEditingBalance(false)}
                         disabled={loading}
+                        className="text-gray-600"
                       >
-                        Cancelar
+                        Cancel
                       </Button>
                       <Button 
                         size="sm"
                         onClick={handleSaveBalance}
                         disabled={loading}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
-                        Salvar
+                        Save
                       </Button>
                     </div>
                   )}
@@ -854,48 +874,51 @@ const Admin = () => {
                 {!isEditingBalance ? (
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <Label className="text-muted-foreground">Saldo Disponível</Label>
-                      <p className="font-bold text-primary">{formatCurrency(selectedUser.available_balance)}</p>
+                      <Label className="text-gray-500">Available Balance</Label>
+                      <p className="font-bold text-blue-600">{formatCurrency(selectedUser.available_balance)}</p>
                     </div>
                     <div>
-                      <Label className="text-muted-foreground">Saldo Investido</Label>
-                      <p className="font-bold">{formatCurrency(selectedUser.invested_balance)}</p>
+                      <Label className="text-gray-500">Invested Balance</Label>
+                      <p className="font-bold text-black">{formatCurrency(selectedUser.invested_balance)}</p>
                     </div>
                     <div>
-                      <Label className="text-muted-foreground">Lucros</Label>
-                      <p className="font-bold text-success">{formatCurrency(selectedUser.profit_balance)}</p>
+                      <Label className="text-gray-500">Profits</Label>
+                      <p className="font-bold text-green-500">{formatCurrency(selectedUser.profit_balance)}</p>
                     </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="available_balance">Saldo Disponível</Label>
+                      <Label htmlFor="available_balance" className="text-black">Available Balance</Label>
                       <Input
                         id="available_balance"
                         type="number"
                         step="0.01"
                         value={editAvailableBalance}
                         onChange={(e) => setEditAvailableBalance(e.target.value)}
+                        className="border-gray-300"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="invested_balance">Saldo Investido</Label>
+                      <Label htmlFor="invested_balance" className="text-black">Invested Balance</Label>
                       <Input
                         id="invested_balance"
                         type="number"
                         step="0.01"
                         value={editInvestedBalance}
                         onChange={(e) => setEditInvestedBalance(e.target.value)}
+                        className="border-gray-300"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="profit_balance">Lucros</Label>
+                      <Label htmlFor="profit_balance" className="text-black">Profits</Label>
                       <Input
                         id="profit_balance"
                         type="number"
                         step="0.01"
                         value={editProfitBalance}
                         onChange={(e) => setEditProfitBalance(e.target.value)}
+                        className="border-gray-300"
                       />
                     </div>
                   </div>
@@ -904,30 +927,30 @@ const Admin = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Chave PIX</Label>
-                  <p className="font-medium text-sm">{selectedUser.pix_key || 'Não configurado'}</p>
+                  <Label className="text-gray-500">PIX Key</Label>
+                  <p className="font-medium text-sm text-black">{selectedUser.pix_key || 'Not configured'}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Status</Label>
+                  <Label className="text-gray-500">Status</Label>
                   <Badge variant={
                     selectedUser.status === 'active' ? 'default' :
                     selectedUser.status === 'pending' ? 'secondary' :
                     'destructive'
-                  }>
-                    {selectedUser.status === 'active' ? 'Ativo' :
-                     selectedUser.status === 'pending' ? 'Pendente' :
-                     'Rejeitado'}
+                  } className={selectedUser.status === 'active' ? 'bg-green-500' : ''}>
+                    {selectedUser.status === 'active' ? 'Active' :
+                     selectedUser.status === 'pending' ? 'Pending' :
+                     'Rejected'}
                   </Badge>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Data de Cadastro</Label>
-                  <p className="text-sm">{formatDateTime(selectedUser.created_at)}</p>
+                  <Label className="text-gray-500">Registration Date</Label>
+                  <p className="text-sm text-black">{formatDateTime(selectedUser.created_at)}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Última Atualização</Label>
-                  <p className="text-sm">{formatDateTime(selectedUser.updated_at)}</p>
+                  <Label className="text-gray-500">Last Updated</Label>
+                  <p className="text-sm text-black">{formatDateTime(selectedUser.updated_at)}</p>
                 </div>
               </div>
             </div>
