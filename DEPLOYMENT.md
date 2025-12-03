@@ -77,32 +77,27 @@ VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-public-key"
 
 ### Option 2: Using Vercel CLI
 
-1. **Install Vercel CLI**
+1. **Login to Vercel**
    ```bash
-   npm install -g vercel
+   npx vercel@latest login
    ```
 
-2. **Login to Vercel**
-   ```bash
-   vercel login
-   ```
-
-3. **Link the Project**
+2. **Link the Project**
    ```bash
    cd /path/to/ganhos-bybit
-   vercel link
+   npx vercel@latest link
    ```
 
-4. **Add Environment Variables**
+3. **Add Environment Variables**
    ```bash
-   vercel env add VITE_SUPABASE_PROJECT_ID production
-   vercel env add VITE_SUPABASE_URL production
-   vercel env add VITE_SUPABASE_PUBLISHABLE_KEY production
+   npx vercel@latest env add VITE_SUPABASE_PROJECT_ID production
+   npx vercel@latest env add VITE_SUPABASE_URL production
+   npx vercel@latest env add VITE_SUPABASE_PUBLISHABLE_KEY production
    ```
 
-5. **Deploy to Production**
+4. **Deploy to Production**
    ```bash
-   vercel --prod
+   npx vercel@latest --prod
    ```
 
 ## Automated Deployment
@@ -120,12 +115,12 @@ This project includes GitHub Actions workflows for continuous deployment.
 
    - **Organization ID**:
      ```bash
-     vercel whoami
+     npx vercel@latest whoami
      ```
      Or find it in your Vercel project settings
 
    - **Project ID**:
-     - After linking with `vercel link`, check `.vercel/project.json`
+     - After linking with `npx vercel@latest link`, check `.vercel/project.json`
      - Or find it in your Vercel project settings
 
 2. **Add GitHub Secrets**
@@ -163,7 +158,7 @@ npm install
 npm run build
 
 # Deploy to preview
-vercel
+npx vercel@latest
 ```
 
 ### Deploy to Production
@@ -176,7 +171,7 @@ npm install
 npm run build
 
 # Deploy to production
-vercel --prod
+npx vercel@latest --prod
 ```
 
 ### Using Vercel's Git Integration
@@ -278,10 +273,17 @@ The `vercel.json` configuration should handle this with rewrites. If issues pers
 
 The build shows a warning about chunk size. To optimize:
 
-1. Enable code splitting:
+1. Enable code splitting with React lazy loading:
    ```typescript
-   // In route configuration, use lazy loading
-   const Dashboard = lazy(() => import('./pages/Dashboard'));
+   // In your route configuration (e.g., App.tsx), use lazy loading
+   import { lazy, Suspense } from 'react';
+   
+   const Dashboard = lazy(() => import('@/pages/Dashboard'));
+   
+   // Wrap lazy components with Suspense
+   <Suspense fallback={<div>Loading...</div>}>
+     <Dashboard />
+   </Suspense>
    ```
 
 2. Configure manual chunks in `vite.config.ts`:

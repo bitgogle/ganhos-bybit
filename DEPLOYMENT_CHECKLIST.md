@@ -83,30 +83,26 @@ Use this checklist to ensure a smooth deployment to Vercel production.
 
 ### Option B: Manual Deployment via CLI
 
-#### 6. Install Vercel CLI
-- [ ] Run `npm install -g vercel`
-- [ ] Verify installation with `vercel --version`
-
-#### 7. Login to Vercel
-- [ ] Run `vercel login`
+#### 6. Login to Vercel
+- [ ] Run `npx vercel@latest login`
 - [ ] Follow authentication prompts
-- [ ] Verify with `vercel whoami`
+- [ ] Verify with `npx vercel@latest whoami`
 
-#### 8. Link Project
+#### 7. Link Project
 - [ ] Navigate to project directory
-- [ ] Run `vercel link`
+- [ ] Run `npx vercel@latest link`
 - [ ] Select your team/account
 - [ ] Confirm or create project
 
-#### 9. Add Environment Variables via CLI
-- [ ] Run `vercel env add VITE_SUPABASE_PROJECT_ID`
+#### 8. Add Environment Variables via CLI
+- [ ] Run `npx vercel@latest env add VITE_SUPABASE_PROJECT_ID`
 - [ ] Enter value and select "Production"
 - [ ] Repeat for `VITE_SUPABASE_URL`
 - [ ] Repeat for `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-#### 10. Deploy
+#### 9. Deploy
 - [ ] Run deployment script: `./scripts/deploy.sh`
-- [ ] OR manually run: `vercel --prod`
+- [ ] OR manually run: `npx vercel@latest --prod`
 
 ## Post-Deployment Checklist
 

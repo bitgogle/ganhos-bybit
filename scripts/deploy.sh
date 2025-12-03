@@ -9,20 +9,11 @@ echo "🚀 Ganhos Bybit - Vercel Deployment"
 echo "===================================="
 echo ""
 
-# Check if Vercel CLI is installed
-if ! command -v vercel &> /dev/null; then
-    echo "❌ Vercel CLI is not installed."
-    echo "📦 Installing Vercel CLI..."
-    npm install -g vercel
-    echo "✅ Vercel CLI installed successfully!"
-    echo ""
-fi
-
-# Check if user is logged in
+# Use npx to run Vercel CLI without global installation
 echo "🔐 Checking Vercel authentication..."
-if ! vercel whoami &> /dev/null; then
+if ! npx vercel@latest whoami &> /dev/null; then
     echo "❌ Not logged in to Vercel."
-    echo "Please run: vercel login"
+    echo "Please run: npx vercel@latest login"
     exit 1
 fi
 echo "✅ Authenticated with Vercel"
@@ -68,12 +59,12 @@ case $choice in
     1)
         echo ""
         echo "🌐 Deploying to Preview..."
-        vercel
+        npx vercel@latest
         ;;
     2)
         echo ""
         echo "🚀 Deploying to Production..."
-        vercel --prod
+        npx vercel@latest --prod
         ;;
     *)
         echo "❌ Invalid choice. Exiting."

@@ -173,26 +173,22 @@ Add the following secrets to your GitHub repository (`Settings` → `Secrets and
 If you prefer to deploy manually using the Vercel CLI:
 
 ```bash
-# Install Vercel CLI globally
-npm install -g vercel
-
-# Login to Vercel
-vercel login
+# Login to Vercel (no global installation needed)
+npx vercel@latest login
 
 # Deploy to preview
-vercel
+npx vercel@latest
 
 # Deploy to production
-vercel --prod
+npx vercel@latest --prod
 ```
 
 ### First Time Setup
 
-1. Install Vercel CLI: `npm install -g vercel`
-2. Login: `vercel login`
-3. Link project: `vercel link`
-4. Set environment variables: `vercel env add VITE_SUPABASE_URL production`
-5. Deploy: `vercel --prod`
+1. Login: `npx vercel@latest login`
+2. Link project: `npx vercel@latest link`
+3. Set environment variables: `npx vercel@latest env add VITE_SUPABASE_URL production`
+4. Deploy: `npx vercel@latest --prod`
 
 ### Vercel Configuration
 
