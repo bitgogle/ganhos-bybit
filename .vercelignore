@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun.lockb
+
+# Testing
+coverage
+
+# Development
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.github/agents
+
+# Documentation
+*.md
+!README.md
+
+# Supabase local
+supabase/.temp

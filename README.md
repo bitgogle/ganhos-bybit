@@ -128,6 +128,77 @@ src/
 8. **Withdrawal**: User can request withdrawal at any time
 9. **Processing**: Admin processes and approves the withdrawal
 
+## Deployment to Vercel
+
+This project is configured for automatic deployment to Vercel.
+
+### Prerequisites
+
+1. A [Vercel account](https://vercel.com/signup)
+2. A Vercel project linked to this repository
+
+### Environment Variables
+
+Before deploying, set up the following environment variables in your Vercel project settings:
+
+```
+VITE_SUPABASE_PROJECT_ID=your-project-id
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-public-key
+```
+
+You can find these values in your Supabase project settings at:
+`https://app.supabase.com/project/_/settings/api`
+
+### Automated Deployment with GitHub Actions
+
+This repository includes GitHub Actions workflows for automated deployment:
+
+- **Production Deployment**: Triggers on push to `main` or `master` branch
+- **Preview Deployment**: Triggers on pull requests to `main` or `master` branch
+
+#### Required GitHub Secrets
+
+Add the following secrets to your GitHub repository (`Settings` → `Secrets and variables` → `Actions`):
+
+- `VERCEL_TOKEN`: Your Vercel authentication token
+  - Get it from: https://vercel.com/account/tokens
+- `VERCEL_ORG_ID`: Your Vercel organization ID
+  - Run: `vercel whoami` or find it in your Vercel project settings
+- `VERCEL_PROJECT_ID`: Your Vercel project ID
+  - Find it in your Vercel project settings (`.vercel/project.json`)
+
+### Manual Deployment
+
+If you prefer to deploy manually using the Vercel CLI:
+
+```bash
+# Login to Vercel (no global installation needed)
+npx vercel@latest login
+
+# Deploy to preview
+npx vercel@latest
+
+# Deploy to production
+npx vercel@latest --prod
+```
+
+### First Time Setup
+
+1. Login: `npx vercel@latest login`
+2. Link project: `npx vercel@latest link`
+3. Set environment variables: `npx vercel@latest env add VITE_SUPABASE_URL production`
+4. Deploy: `npx vercel@latest --prod`
+
+### Vercel Configuration
+
+The project includes a `vercel.json` file with the following configuration:
+
+- **Framework**: Vite
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Rewrites**: All routes redirect to `/` for client-side routing
+
 ## License
 
 This project is private and proprietary.
