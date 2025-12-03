@@ -62,9 +62,6 @@ export const WithdrawalFeeSettings = () => {
       toast.success('Configurações de taxa atualizadas com sucesso!');
     } catch (err: unknown) {
       toast.error(getErrorMessage(err));
-      toast.success('Fee settings updated successfully!');
-    } catch (err: any) {
-      toast.error(err.message);
     } finally {
       setLoading(false);
     }

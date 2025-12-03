@@ -117,21 +117,6 @@ const Register = () => {
         title: 'Erro',
         description: getErrorMessage(error) || 'Ocorreu um erro ao criar sua conta.',
       });
-    } catch (error: any) {
-      // Handle duplicate email error
-      if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
-        toast({
-          variant: 'destructive',
-          title: 'Email já cadastrado',
-          description: 'Este email já está sendo usado. Por favor, faça login ou use outro email.',
-        });
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro',
-          description: error.message || 'Ocorreu um erro ao criar sua conta.',
-        });
-      }
     } finally {
       setLoading(false);
     }

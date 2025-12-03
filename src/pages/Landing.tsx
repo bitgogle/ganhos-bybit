@@ -105,8 +105,6 @@ const Landing = () => {
       }
     } catch (error: unknown) {
       toast.error(getErrorMessage(error) || 'Credenciais inválidas');
-    } catch (error: any) {
-      toast.error(error.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
