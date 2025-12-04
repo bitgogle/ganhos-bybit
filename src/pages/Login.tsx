@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useApp } from '@/context/AppContext';
 import { TrendingUp, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,21 +13,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { profile, refreshProfile } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const loginSuccessful = useRef(false);
-  const hasNavigated = useRef(false);
-
-  // Navigate to dashboard once profile is loaded after successful login
-  useEffect(() => {
-    if (loginSuccessful.current && profile && !hasNavigated.current) {
-      // Profile is now available, navigate to dashboard
-      hasNavigated.current = true;
-      navigate('/dashboard');
-      loginSuccessful.current = false;
-    }
-  }, [profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,12 +54,9 @@ const Login = () => {
           description: 'Redirecionando...',
         });
         
-        // Refresh profile - navigation will happen automatically via useEffect
-        // when profile becomes available
-        await refreshProfile();
-        
-        // Set flag to trigger navigation once profile is loaded
-        loginSuccessful.current = true;
+        // Navigate to dashboard - it will wait for profile to load before showing content
+        // The AppContext auth listener will automatically fetch the profile
+        navigate('/dashboard');
       }
     } catch (error: unknown) {
       toast({
