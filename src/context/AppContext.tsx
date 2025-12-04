@@ -151,7 +151,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.error('Error fetching profile:', error);
       // Show generic error message as it could be various types of errors
       toast.error('Erro ao carregar perfil. Tente novamente.');
-      // Set loading to false even on error so UI doesn't hang
     } finally {
       setLoading(false);
     }
@@ -184,7 +183,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       } catch (error) {
         console.error('Failed to get Supabase session:', error);
-        toast.error('Erro ao conectar com o servidor. Tente novamente.');
+        toast.error('Erro ao conectar. Tente novamente.');
         setLoading(false);
       }
     };
