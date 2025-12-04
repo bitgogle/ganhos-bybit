@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,9 +14,19 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { refreshProfile } = useApp();
+  const { profile, refreshProfile } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const loginSuccessful = useRef(false);
+
+  // Navigate to dashboard once profile is loaded after successful login
+  useEffect(() => {
+    if (loginSuccessful.current && profile) {
+      // Profile is now available, navigate to dashboard
+      navigate('/dashboard');
+      loginSuccessful.current = false;
+    }
+  }, [profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,16 +61,17 @@ const Login = () => {
       }
 
       if (data.session) {
-        await refreshProfile();
-        
         toast({
           title: 'Login realizado com sucesso!',
           description: 'Redirecionando...',
         });
         
-        // User login page always redirects to user dashboard
-        // Admin panel is only accessible via the admin authentication page (floating shield button on landing page)
-        navigate('/dashboard');
+        // Refresh profile - navigation will happen automatically via useEffect
+        // when profile becomes available
+        await refreshProfile();
+        
+        // Set flag to trigger navigation once profile is loaded
+        loginSuccessful.current = true;
       }
     } catch (error: unknown) {
       toast({
