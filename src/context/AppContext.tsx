@@ -140,6 +140,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         if (roleError) {
           console.error('Error fetching user role from Supabase:', roleError);
+          // Continue with default 'user' role if role fetch fails
+          // This ensures users can still access the app even if role table has issues
         }
 
         setProfile({ ...data, role: roleData?.role || 'user' } as Profile);
@@ -147,8 +149,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-      // Show user-friendly error message for profile fetch failures
-      toast.error('Erro ao carregar perfil. Verifique sua conexão.');
+      // Show generic error message as it could be various types of errors
+      toast.error('Erro ao carregar perfil. Tente novamente.');
       // Set loading to false even on error so UI doesn't hang
     } finally {
       setLoading(false);
@@ -169,7 +171,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         
         if (error) {
           console.error('Error getting Supabase session:', error);
-          toast.error('Erro de conexão. Verifique sua conexão com a internet.');
+          toast.error('Erro ao conectar. Tente novamente.');
           setLoading(false);
           return;
         }
