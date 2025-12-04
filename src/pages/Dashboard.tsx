@@ -54,7 +54,7 @@ interface Notification {
 }
 
 const Dashboard = () => {
-  const { profile, logout, investmentPlans, refreshProfile } = useApp();
+  const { profile, logout, investmentPlans, refreshProfile, loading: profileLoading } = useApp();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -80,12 +80,15 @@ const Dashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
+    // Don't redirect while profile is still loading
+    if (profileLoading) return;
+    
     if (!profile) {
       navigate('/login');
     } else if (profile.status !== 'active') {
       navigate('/pending-approval');
     }
-  }, [profile, navigate]);
+  }, [profile, profileLoading, navigate]);
 
   const fetchTransactions = useCallback(async () => {
     if (!profile) return;

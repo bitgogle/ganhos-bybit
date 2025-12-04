@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useApp } from '@/context/AppContext';
 import { TrendingUp, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +13,6 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { refreshProfile } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -51,15 +49,13 @@ const Login = () => {
       }
 
       if (data.session) {
-        await refreshProfile();
-        
         toast({
           title: 'Login realizado com sucesso!',
           description: 'Redirecionando...',
         });
         
-        // User login page always redirects to user dashboard
-        // Admin panel is only accessible via the admin authentication page (floating shield button on landing page)
+        // Navigate to dashboard - it will wait for profile to load before showing content
+        // The AppContext auth listener will automatically fetch the profile
         navigate('/dashboard');
       }
     } catch (error: unknown) {
