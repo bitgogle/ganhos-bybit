@@ -125,21 +125,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         .eq('id', currentSession.user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching profile from Supabase:', error);
+        toast.error('Erro ao carregar perfil. Verifique sua conexão.');
+        throw error;
+      }
 
       if (data) {
         // Check role from user_roles table (secure)
-        const { data: roleData } = await supabase
+        const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', currentSession.user.id)
           .single();
+
+        if (roleError) {
+          console.error('Error fetching user role from Supabase:', roleError);
+        }
 
         setProfile({ ...data, role: roleData?.role || 'user' } as Profile);
         setIsAdmin(roleData?.role === 'admin');
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      // Don't show toast for network errors as it may be transient
+      // The loading state will handle the UI appropriately
     } finally {
       setLoading(false);
     }
@@ -152,15 +162,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [session, fetchProfile]);
 
   useEffect(() => {
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        fetchProfile(session);
-      } else {
+    // Initial session check with error handling
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (error) {
+          console.error('Error getting Supabase session:', error);
+          toast.error('Erro de conexão. Verifique sua conexão com a internet.');
+          setLoading(false);
+          return;
+        }
+        
+        setSession(session);
+        if (session) {
+          fetchProfile(session);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to get Supabase session:', error);
+        toast.error('Erro ao conectar com o servidor. Tente novamente.');
         setLoading(false);
-      }
-    });
+      });
 
     // Auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
