@@ -69,7 +69,22 @@ npm install
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The application will be available at `http://localhost:8080`
+
+### Environment Configuration
+
+The application requires environment variables to connect to Supabase. The repository includes a `.env` file with the Supabase configuration.
+
+**Important**: The environment variables use the `VITE_` prefix, which is required by Vite to expose them to the client-side code:
+
+- `VITE_SUPABASE_URL` - Your Supabase project URL
+- `VITE_SUPABASE_PUBLISHABLE_KEY` - Your Supabase anon/public key
+
+If you need to use different credentials:
+
+1. Update the `.env` file with your Supabase credentials
+2. Get your credentials from: `https://app.supabase.com/project/_/settings/api`
+3. Only use the **anon/public key** (never commit service role keys to client-side code)
 
 ## Available Scripts
 
@@ -142,7 +157,6 @@ This project is configured for automatic deployment to Vercel.
 Before deploying, set up the following environment variables in your Vercel project settings:
 
 ```
-VITE_SUPABASE_PROJECT_ID=your-project-id
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-public-key
 ```

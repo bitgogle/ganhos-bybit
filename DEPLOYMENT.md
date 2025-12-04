@@ -44,7 +44,6 @@ cp .env.example .env
 Update the values in `.env`:
 
 ```env
-VITE_SUPABASE_PROJECT_ID="your-project-id"
 VITE_SUPABASE_URL="https://your-project-id.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-public-key"
 ```
@@ -66,7 +65,6 @@ VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-public-key"
 
 3. **Add Environment Variables**
    - In the "Environment Variables" section, add:
-     - `VITE_SUPABASE_PROJECT_ID`
      - `VITE_SUPABASE_URL`
      - `VITE_SUPABASE_PUBLISHABLE_KEY`
    - Select "Production", "Preview", and "Development" for each variable
@@ -90,7 +88,6 @@ VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-public-key"
 
 3. **Add Environment Variables**
    ```bash
-   npx vercel@latest env add VITE_SUPABASE_PROJECT_ID production
    npx vercel@latest env add VITE_SUPABASE_URL production
    npx vercel@latest env add VITE_SUPABASE_PUBLISHABLE_KEY production
    ```
