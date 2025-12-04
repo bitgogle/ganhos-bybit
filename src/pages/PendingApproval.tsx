@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Clock, LogOut, TrendingUp } from 'lucide-react';
 
 const PendingApproval = () => {
-  const { profile, logout } = useApp();
+  const { profile, logout, loading: profileLoading } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Don't redirect while profile is still loading
+    if (profileLoading) return;
+    
     if (!profile) {
       navigate('/login');
     } else if (profile.status === 'active') {
@@ -17,14 +20,24 @@ const PendingApproval = () => {
     } else if (profile.status === 'rejected') {
       navigate('/rejected');
     }
-  }, [profile, navigate]);
+  }, [profile, profileLoading, navigate]);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
-  if (!profile) return null;
+  // Show loading state while profile is being fetched
+  if (profileLoading || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-primary/5 to-background">
