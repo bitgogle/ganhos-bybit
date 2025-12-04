@@ -127,7 +127,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       if (error) {
         console.error('Error fetching profile from Supabase:', error);
-        toast.error('Erro ao carregar perfil. Verifique sua conexão.');
         throw error;
       }
 
@@ -148,8 +147,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-      // Don't show toast for network errors as it may be transient
-      // The loading state will handle the UI appropriately
+      // Show user-friendly error message for profile fetch failures
+      toast.error('Erro ao carregar perfil. Verifique sua conexão.');
+      // Set loading to false even on error so UI doesn't hang
     } finally {
       setLoading(false);
     }
@@ -163,8 +163,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     // Initial session check with error handling
-    supabase.auth.getSession()
-      .then(({ data: { session }, error }) => {
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
         if (error) {
           console.error('Error getting Supabase session:', error);
           toast.error('Erro de conexão. Verifique sua conexão com a internet.');
@@ -178,12 +180,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         } else {
           setLoading(false);
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Failed to get Supabase session:', error);
         toast.error('Erro ao conectar com o servidor. Tente novamente.');
         setLoading(false);
-      });
+      }
+    };
+    
+    initSession();
 
     // Auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {

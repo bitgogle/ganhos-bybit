@@ -10,14 +10,15 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   console.error('Missing Supabase configuration. Please check your .env file.');
   console.error('SUPABASE_URL:', SUPABASE_URL ? 'Set' : 'Missing');
   console.error('SUPABASE_PUBLISHABLE_KEY:', SUPABASE_PUBLISHABLE_KEY ? 'Set' : 'Missing');
+  throw new Error('Supabase configuration is missing. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in your .env file.');
 }
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(
-  SUPABASE_URL || '', 
-  SUPABASE_PUBLISHABLE_KEY || '', 
+  SUPABASE_URL, 
+  SUPABASE_PUBLISHABLE_KEY, 
   {
     auth: {
       storage: localStorage,
