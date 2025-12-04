@@ -18,11 +18,13 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const loginSuccessful = useRef(false);
+  const hasNavigated = useRef(false);
 
   // Navigate to dashboard once profile is loaded after successful login
   useEffect(() => {
-    if (loginSuccessful.current && profile) {
+    if (loginSuccessful.current && profile && !hasNavigated.current) {
       // Profile is now available, navigate to dashboard
+      hasNavigated.current = true;
       navigate('/dashboard');
       loginSuccessful.current = false;
     }
