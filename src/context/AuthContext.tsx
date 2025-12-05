@@ -69,7 +69,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
-      toast.success('Login realizado com sucesso!');
     } catch (error: unknown) {
       console.error('Login error:', error);
       throw error;
@@ -81,16 +80,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Extract only digits from phone and CPF
       const phoneDigits = data.phone.replace(/\D/g, '');
       const cpfDigits = data.cpf ? data.cpf.replace(/\D/g, '') : '';
-
-      // Validate phone number (must have exactly 11 digits)
-      if (phoneDigits.length !== 11) {
-        throw new Error('Telefone deve conter exatamente 11 dígitos');
-      }
-
-      // Validate CPF if provided (must have exactly 11 digits)
-      if (data.cpf && cpfDigits.length !== 11) {
-        throw new Error('CPF deve conter exatamente 11 dígitos');
-      }
 
       // Create full name from name and surname
       const fullName = `${data.name.trim()} ${data.surname.trim()}`;
@@ -124,8 +113,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Sign out after registration so user can log in fresh
       await supabase.auth.signOut();
-
-      toast.success('Conta criada com sucesso! Você já pode fazer login.');
     } catch (error: unknown) {
       console.error('Registration error:', error);
       throw error;

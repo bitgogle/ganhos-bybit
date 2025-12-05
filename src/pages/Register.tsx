@@ -18,11 +18,7 @@ const registerSchema = z.object({
     const digits = val.replace(/\D/g, '');
     return digits.length === 11;
   }, 'Telefone deve conter exatamente 11 dígitos'),
-  cpf: z.string().refine((val) => {
-    if (!val) return true; // CPF is optional
-    const digits = val.replace(/\D/g, '');
-    return digits.length === 11;
-  }, 'CPF deve conter exatamente 11 dígitos').optional().or(z.literal('')),
+  cpf: z.string().optional().refine((val) => !val || val.replace(/\D/g, '').length === 11, 'CPF deve conter exatamente 11 dígitos'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
