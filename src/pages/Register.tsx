@@ -4,21 +4,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useApp } from '@/context/AppContext';
 import { TrendingUp, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { z } from 'zod';
 import { getErrorMessage } from '@/lib/utils';
 
 const registerSchema = z.object({
-  name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres').max(100, 'Nome muito longo'),
-  email: z.string().email('Email inválido').max(255, 'Email muito longo'),
-  phone: z.string().regex(/^\d{10,11}$/, 'Telefone inválido. Digite 10 ou 11 dígitos'),
-  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF inválido. Use o formato XXX.XXX.XXX-XX'),
-  password: z.string()
-    .min(8, 'Senha deve ter no mínimo 8 caracteres')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Senha deve conter letras maiúsculas, minúsculas e números'),
+  name: z.string().min(1, 'Nome é obrigatório'),
+  surname: z.string().min(1, 'Sobrenome é obrigatório'),
+  email: z.string().email('Email inválido'),
+  phone: z.string().refine((val) => {
+    const digits = val.replace(/\D/g, '');
+    return digits.length === 11;
+  }, 'Telefone deve conter exatamente 11 dígitos'),
+  cpf: z.string().refine((val) => {
+    if (!val) return true; // CPF is optional
+    const digits = val.replace(/\D/g, '');
+    return digits.length === 11;
+  }, 'CPF deve conter exatamente 11 dígitos').optional().or(z.literal('')),
+  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'As senhas não coincidem',
@@ -28,6 +33,7 @@ const registerSchema = z.object({
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
+    surname: '',
     email: '',
     phone: '',
     cpf: '',
@@ -38,6 +44,7 @@ const Register = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { register: registerUser } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -74,35 +81,14 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Register user with Supabase Auth (no email confirmation required)
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email.trim(),
+      await registerUser({
+        name: formData.name,
+        surname: formData.surname,
+        email: formData.email,
+        phone: formData.phone,
         password: formData.password,
-        options: {
-          data: {
-            name: formData.name.trim(),
-            phone: formData.phone.trim(),
-            cpf: formData.cpf.trim(),
-          },
-        },
+        cpf: formData.cpf || undefined,
       });
-
-      if (authError) throw authError;
-
-      // If user was created, update profile to be active immediately
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ status: 'active' })
-          .eq('id', authData.user.id);
-
-        if (profileError) {
-          console.error('Profile update error:', profileError);
-        }
-      }
-      
-      // Sign out after registration so user can log in fresh
-      await supabase.auth.signOut();
       
       toast({
         title: 'Conta criada com sucesso!',
@@ -139,17 +125,43 @@ const Register = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome Completo</Label>
+              <Label htmlFor="name">Nome</Label>
               <Input
                 id="name"
                 name="name"
-                placeholder="Seu nome completo"
+                placeholder="Seu nome"
                 value={formData.name}
                 onChange={handleChange}
                 required
                 className={errors.name ? 'border-destructive' : ''}
               />
               {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="surname">Sobrenome</Label>
+              <Input
+                id="surname"
+                name="surname"
+                placeholder="Seu sobrenome"
+                value={formData.surname}
+                onChange={handleChange}
+                required
+                className={errors.surname ? 'border-destructive' : ''}
+              />
+              {errors.surname && <p className="text-sm text-destructive">{errors.surname}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone</Label>
+              <Input
+                id="phone"
+                name="phone"
+                placeholder="11987654321 ou (11) 98765-4321"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                className={errors.phone ? 'border-destructive' : ''}
+              />
+              {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -166,38 +178,12 @@ const Register = () => {
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefone</Label>
-              <Input
-                id="phone"
-                name="phone"
-                placeholder="11987654321"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                className={errors.phone ? 'border-destructive' : ''}
-              />
-              {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cpf">CPF</Label>
-              <Input
-                id="cpf"
-                name="cpf"
-                placeholder="000.000.000-00"
-                value={formData.cpf}
-                onChange={handleChange}
-                required
-                className={errors.cpf ? 'border-destructive' : ''}
-              />
-              {errors.cpf && <p className="text-sm text-destructive">{errors.cpf}</p>}
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="Mínimo 6 caracteres"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -211,13 +197,25 @@ const Register = () => {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
-                placeholder="••••••••"
+                placeholder="Digite a senha novamente"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
                 className={errors.confirmPassword ? 'border-destructive' : ''}
               />
               {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cpf">CPF (opcional)</Label>
+              <Input
+                id="cpf"
+                name="cpf"
+                placeholder="12345678910 ou 123.456.789-10"
+                value={formData.cpf}
+                onChange={handleChange}
+                className={errors.cpf ? 'border-destructive' : ''}
+              />
+              {errors.cpf && <p className="text-sm text-destructive">{errors.cpf}</p>}
             </div>
             <Button type="submit" className="w-full gradient-gold" disabled={loading}>
               {loading ? 'Cadastrando...' : 'Criar Conta'}

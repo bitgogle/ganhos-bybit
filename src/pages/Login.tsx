@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TrendingUp, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { getErrorMessage } from '@/lib/utils';
 
 const Login = () => {
@@ -15,49 +15,23 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      await login(email, password);
+      
+      toast({
+        title: 'Login realizado com sucesso!',
+        description: 'Redirecionando...',
       });
-
-      if (error) throw error;
-
-      // Check if user is restricted
-      if (data.user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('restricted')
-          .eq('id', data.user.id)
-          .single();
-
-        if (profileData?.restricted) {
-          await supabase.auth.signOut();
-          toast({
-            variant: 'destructive',
-            title: 'Acesso Negado',
-            description: 'Sua conta foi restrita. Entre em contato com o suporte.',
-          });
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (data.session) {
-        toast({
-          title: 'Login realizado com sucesso!',
-          description: 'Redirecionando...',
-        });
-        
-        // Navigate to dashboard - it will wait for profile to load before showing content
-        // The AppContext auth listener will automatically fetch the profile
-        navigate('/dashboard');
-      }
+      
+      // Navigate to dashboard - it will wait for profile to load before showing content
+      // The AppContext auth listener will automatically fetch the profile
+      navigate('/dashboard');
     } catch (error: unknown) {
       toast({
         variant: 'destructive',
