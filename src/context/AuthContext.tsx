@@ -92,8 +92,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('CPF deve conter exatamente 11 dígitos');
       }
 
-      // Create full name from name and surname (already trimmed and validated in schema)
-      const fullName = `${data.name.trim()} ${data.surname.trim()}`;
+      // Validate name and surname are not empty after trimming
+      const trimmedName = data.name.trim();
+      const trimmedSurname = data.surname.trim();
+      if (!trimmedName || !trimmedSurname) {
+        throw new Error('Nome e sobrenome são obrigatórios');
+      }
+
+      // Create full name from name and surname
+      const fullName = `${trimmedName} ${trimmedSurname}`;
 
       // Register user with Supabase Auth
       // autoConfirm is handled by Supabase settings - no email confirmation required
