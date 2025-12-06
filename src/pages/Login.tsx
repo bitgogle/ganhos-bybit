@@ -23,15 +23,13 @@ const Login = () => {
   useEffect(() => {
     if (waitingForProfile) {
       const timeout = setTimeout(() => {
-        if (waitingForProfile) {
-          toast({
-            variant: 'destructive',
-            title: 'Tempo limite excedido',
-            description: 'Redirecionando para o dashboard...',
-          });
-          navigate('/dashboard');
-          setWaitingForProfile(false);
-        }
+        toast({
+          variant: 'destructive',
+          title: 'Tempo limite excedido',
+          description: 'Redirecionando para o dashboard...',
+        });
+        navigate('/dashboard');
+        setWaitingForProfile(false);
       }, 10000); // 10 seconds
 
       return () => clearTimeout(timeout);
@@ -53,6 +51,10 @@ const Login = () => {
           navigate('/pending-approval');
         } else if (profile.status === 'rejected') {
           navigate('/rejected');
+        } else {
+          // Handle any unknown status values
+          console.warn('Unknown profile status:', profile.status);
+          navigate('/dashboard');
         }
         setWaitingForProfile(false);
       } else {
