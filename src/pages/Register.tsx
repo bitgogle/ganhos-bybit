@@ -86,7 +86,7 @@ const Register = () => {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        cpf: formData.cpf || undefined,
+        cpf: formData.cpf.trim() || undefined,
       });
 
       // User is automatically logged in and redirected by AuthContext

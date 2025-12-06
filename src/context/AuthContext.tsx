@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('CPF deve conter exatamente 11 dígitos');
       }
 
-      // Create full name from name and surname
+      // Create full name from name and surname (already trimmed and validated in schema)
       const fullName = `${data.name.trim()} ${data.surname.trim()}`;
 
       // Register user with Supabase Auth
@@ -106,7 +106,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             phone: phoneDigits,
             cpf: cpfDigits,
           },
-          emailRedirectTo: undefined, // No email confirmation
         },
       });
 
