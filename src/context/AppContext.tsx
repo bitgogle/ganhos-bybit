@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
-import { useAuth } from './AuthContext';
 
 export interface Profile {
   id: string;
@@ -113,7 +112,7 @@ export const generateInvestmentPlans = (): InvestmentPlan[] => {
 export const investmentPlans: InvestmentPlan[] = generateInvestmentPlans();
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { session, loading: authLoading, logout: authLogout } = useAuth();
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -153,21 +152,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [session, fetchProfile]);
 
   useEffect(() => {
-    // Wait for auth to initialize
-    if (authLoading) {
-      return;
-    }
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        fetchProfile(session);
+      } else {
+        setLoading(false);
+      }
+    });
 
-    // Fetch profile when session is available
-    if (session) {
-      setLoading(true);
-      fetchProfile(session);
-    } else {
-      setProfile(null);
-      setIsAdmin(false);
-      setLoading(false);
-    }
-  }, [session, authLoading, fetchProfile]);
+    // Auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        fetchProfile(session);
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [fetchProfile]);
 
   // Realtime subscription for profile changes
   useEffect(() => {
@@ -195,7 +203,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
   }, [session, fetchProfile]);
 
-  const logout = authLogout;
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Logout realizado com sucesso!');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Erro ao fazer logout');
+    }
+  };
 
   return (
     <AppContext.Provider

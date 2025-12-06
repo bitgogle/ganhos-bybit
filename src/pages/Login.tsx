@@ -5,31 +5,65 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TrendingUp, Lock } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { getErrorMessage } from '@/lib/utils';
-import { toast } from 'sonner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await login(email, password);
-      
-      toast.success('Login realizado com sucesso!');
-      
-      // Navigate to dashboard - it will wait for profile to load before showing content
-      // The AuthContext and AppContext listeners will automatically fetch the profile
-      navigate('/dashboard');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      // Check if user is restricted
+      if (data.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('restricted')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileData?.restricted) {
+          await supabase.auth.signOut();
+          toast({
+            variant: 'destructive',
+            title: 'Acesso Negado',
+            description: 'Sua conta foi restrita. Entre em contato com o suporte.',
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      if (data.session) {
+        toast({
+          title: 'Login realizado com sucesso!',
+          description: 'Redirecionando...',
+        });
+        
+        // Navigate to dashboard - it will wait for profile to load before showing content
+        // The AppContext auth listener will automatically fetch the profile
+        navigate('/dashboard');
+      }
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error) || 'Email ou senha incorretos.');
+      toast({
+        variant: 'destructive',
+        title: 'Erro no login',
+        description: getErrorMessage(error) || 'Email ou senha incorretos.',
+      });
     } finally {
       setLoading(false);
     }
