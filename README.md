@@ -83,18 +83,38 @@ This application requires a properly configured Supabase backend. See the **[com
 
 ### Environment Configuration
 
-The application requires environment variables to connect to Supabase. The repository includes a `.env` file with the Supabase configuration.
+The application requires environment variables to connect to Supabase. The repository includes a `.env.example` file that you should copy to create your own `.env` file.
 
-**Important**: The environment variables use the `VITE_` prefix, which is required by Vite to expose them to the client-side code:
+**Setup:**
+
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Update the `.env` file with your Supabase credentials
+3. Get your credentials from: `https://app.supabase.com/project/_/settings/api`
+
+**Important Security Notes:**
+
+⚠️ **DO NOT commit your `.env` file to version control** - it contains sensitive credentials.
+
+The environment variables use the `VITE_` prefix, which is required by Vite to expose them to the client-side code:
 
 - `VITE_SUPABASE_URL` - Your Supabase project URL
-- `VITE_SUPABASE_PUBLISHABLE_KEY` - Your Supabase anon/public key
+- `VITE_SUPABASE_PUBLISHABLE_KEY` - Your Supabase anon/public key (safe for client-side use)
 
-If you need to use different credentials:
+**Critical Security Guidelines:**
+- ✅ Only use the **anon/public key** for client-side code
+- ❌ Never commit `.env` files or service role keys to the repository
+- 🔄 If you suspect any credentials have been exposed, rotate them immediately in your Supabase project settings
+- 🔒 Service role keys should only be used in server-side code or secure secret managers
 
-1. Update the `.env` file with your Supabase credentials
-2. Get your credentials from: `https://app.supabase.com/project/_/settings/api`
-3. Only use the **anon/public key** (never commit service role keys to client-side code)
+**Key Rotation:** If any Supabase credentials were previously committed to this repository, you should:
+1. Generate new keys in your Supabase project settings
+2. Update your `.env` file with the new credentials
+3. Redeploy your application
+4. Consider using tools like `git-filter-repo` or BFG Repo-Cleaner to remove sensitive data from git history
 
 **Related Documentation:**
 - [SUPABASE_SETUP.md](SUPABASE_SETUP.md) - Complete database setup guide

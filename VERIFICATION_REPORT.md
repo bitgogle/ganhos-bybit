@@ -17,7 +17,7 @@ The Ganhos Bybit investment platform has been thoroughly tested and verified. Al
 
 ### 2. Supabase Integration
 - ✅ **Client Configuration**: Properly configured with environment variables
-- ✅ **URL**: `https://ipjdtxakuwcpjttfizcj.supabase.co`
+- ✅ **URL**: Configured via `VITE_SUPABASE_URL` environment variable
 - ✅ **Auth Storage**: LocalStorage with persistent sessions
 - ✅ **Auto Refresh**: Enabled
 - ✅ **Database Migrations**: 4 migration files present and structured
