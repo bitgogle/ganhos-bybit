@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,13 +8,68 @@ import { TrendingUp, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getErrorMessage } from '@/lib/utils';
+import { useApp } from '@/context/AppContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [waitingForProfile, setWaitingForProfile] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { profile, loading: profileLoading } = useApp();
+
+  // Safety timeout: if profile doesn't load within 10 seconds, navigate anyway
+  useEffect(() => {
+    if (waitingForProfile) {
+      const timeout = setTimeout(() => {
+        toast({
+          variant: 'destructive',
+          title: 'Tempo limite excedido',
+          description: 'Redirecionando para o dashboard...',
+        });
+        navigate('/dashboard');
+        setWaitingForProfile(false);
+      }, 10000); // 10 seconds
+
+      return () => clearTimeout(timeout);
+    }
+  }, [waitingForProfile, navigate, toast]);
+
+  // Handle navigation after profile is loaded
+  useEffect(() => {
+    if (waitingForProfile && !profileLoading) {
+      if (profile) {
+        // Profile has loaded, navigate based on status
+        if (profile.status === 'active') {
+          toast({
+            title: 'Login realizado com sucesso!',
+            description: 'Redirecionando para o dashboard...',
+          });
+          navigate('/dashboard');
+        } else if (profile.status === 'pending') {
+          navigate('/pending-approval');
+        } else if (profile.status === 'rejected') {
+          navigate('/rejected');
+        } else {
+          // Handle any unknown status values
+          console.warn('Unknown profile status:', profile.status);
+          navigate('/dashboard');
+        }
+        setWaitingForProfile(false);
+      } else {
+        // Profile failed to load, try navigating to dashboard anyway
+        // Dashboard will handle the redirect if needed
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao carregar perfil',
+          description: 'Tentando acessar o dashboard...',
+        });
+        navigate('/dashboard');
+        setWaitingForProfile(false);
+      }
+    }
+  }, [waitingForProfile, profileLoading, profile, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,14 +104,9 @@ const Login = () => {
       }
 
       if (data.session) {
-        toast({
-          title: 'Login realizado com sucesso!',
-          description: 'Redirecionando...',
-        });
-        
-        // Navigate to dashboard - it will wait for profile to load before showing content
-        // The AppContext auth listener will automatically fetch the profile
-        navigate('/dashboard');
+        // Set flag to wait for profile to load
+        // The useEffect above will handle navigation once profile is ready
+        setWaitingForProfile(true);
       }
     } catch (error: unknown) {
       toast({
@@ -107,8 +157,8 @@ const Login = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full gradient-gold" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+            <Button type="submit" className="w-full gradient-gold" disabled={loading || waitingForProfile}>
+              {loading ? 'Entrando...' : waitingForProfile ? 'Carregando perfil...' : 'Entrar'}
             </Button>
           </form>
           <div className="mt-6 text-center space-y-2">
