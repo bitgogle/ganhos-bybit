@@ -89,28 +89,15 @@ const Register = () => {
 
       if (authError) throw authError;
 
-      // If user was created, update profile to be active immediately
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ status: 'active' })
-          .eq('id', authData.user.id);
-
-        if (profileError) {
-          console.error('Profile update error:', profileError);
-        }
-      }
-      
-      // Sign out after registration so user can log in fresh
-      await supabase.auth.signOut();
-      
+      // User is created with 'active' status automatically via DB trigger
+      // Keep user logged in and redirect to dashboard immediately
       toast({
         title: 'Conta criada com sucesso!',
-        description: 'Você já pode fazer login com seu email e senha.',
+        description: 'Bem-vindo ao Ganhos Bybit!',
       });
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      
+      // Navigate to dashboard - user is already logged in and active
+      navigate('/dashboard');
     } catch (error: unknown) {
       toast({
         variant: 'destructive',
