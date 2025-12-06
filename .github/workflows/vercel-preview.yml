@@ -28,6 +28,15 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Ensure VERCEL_TOKEN is available
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "ERROR: VERCEL_TOKEN is not set or not available to this run."
+            echo "Check repository secrets (Settings → Secrets and variables → Actions)."
+            echo "Note: GitHub does not expose secrets to workflows triggered by pull requests from forks."
+            exit 1
+          fi
+
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
