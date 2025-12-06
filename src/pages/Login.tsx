@@ -19,22 +19,53 @@ const Login = () => {
   const { toast } = useToast();
   const { profile, loading: profileLoading } = useApp();
 
+  // Safety timeout: if profile doesn't load within 10 seconds, navigate anyway
+  useEffect(() => {
+    if (waitingForProfile) {
+      const timeout = setTimeout(() => {
+        if (waitingForProfile) {
+          toast({
+            variant: 'destructive',
+            title: 'Tempo limite excedido',
+            description: 'Redirecionando para o dashboard...',
+          });
+          navigate('/dashboard');
+          setWaitingForProfile(false);
+        }
+      }, 10000); // 10 seconds
+
+      return () => clearTimeout(timeout);
+    }
+  }, [waitingForProfile, navigate, toast]);
+
   // Handle navigation after profile is loaded
   useEffect(() => {
-    if (waitingForProfile && !profileLoading && profile) {
-      // Profile has loaded, navigate based on status
-      if (profile.status === 'active') {
+    if (waitingForProfile && !profileLoading) {
+      if (profile) {
+        // Profile has loaded, navigate based on status
+        if (profile.status === 'active') {
+          toast({
+            title: 'Login realizado com sucesso!',
+            description: 'Redirecionando para o dashboard...',
+          });
+          navigate('/dashboard');
+        } else if (profile.status === 'pending') {
+          navigate('/pending-approval');
+        } else if (profile.status === 'rejected') {
+          navigate('/rejected');
+        }
+        setWaitingForProfile(false);
+      } else {
+        // Profile failed to load, try navigating to dashboard anyway
+        // Dashboard will handle the redirect if needed
         toast({
-          title: 'Login realizado com sucesso!',
-          description: 'Redirecionando para o dashboard...',
+          variant: 'destructive',
+          title: 'Erro ao carregar perfil',
+          description: 'Tentando acessar o dashboard...',
         });
         navigate('/dashboard');
-      } else if (profile.status === 'pending') {
-        navigate('/pending-approval');
-      } else if (profile.status === 'rejected') {
-        navigate('/rejected');
+        setWaitingForProfile(false);
       }
-      setWaitingForProfile(false);
     }
   }, [waitingForProfile, profileLoading, profile, navigate, toast]);
 
