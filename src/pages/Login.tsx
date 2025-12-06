@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TrendingUp, Lock } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 import { getErrorMessage } from '@/lib/utils';
 
 const Login = () => {
@@ -14,56 +14,19 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      // Check if user is restricted
-      if (data.user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('restricted')
-          .eq('id', data.user.id)
-          .single();
-
-        if (profileData?.restricted) {
-          await supabase.auth.signOut();
-          toast({
-            variant: 'destructive',
-            title: 'Acesso Negado',
-            description: 'Sua conta foi restrita. Entre em contato com o suporte.',
-          });
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (data.session) {
-        toast({
-          title: 'Login realizado com sucesso!',
-          description: 'Redirecionando...',
-        });
-        
-        // Navigate to dashboard - it will wait for profile to load before showing content
-        // The AppContext auth listener will automatically fetch the profile
-        navigate('/dashboard');
-      }
+      await login(email, password);
+      
+      // Navigate to dashboard - user is now logged in
+      navigate('/dashboard');
     } catch (error: unknown) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro no login',
-        description: getErrorMessage(error) || 'Email ou senha incorretos.',
-      });
+      toast.error(getErrorMessage(error) || 'Email ou senha incorretos.');
     } finally {
       setLoading(false);
     }
