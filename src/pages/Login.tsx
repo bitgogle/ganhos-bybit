@@ -26,7 +26,7 @@ const Login = () => {
       toast.success('Login realizado com sucesso!');
       
       // Navigate to dashboard - it will wait for profile to load before showing content
-      // The AppContext auth listener will automatically fetch the profile
+      // The AuthContext and AppContext listeners will automatically fetch the profile
       navigate('/dashboard');
     } catch (error: unknown) {
       toast.error(getErrorMessage(error) || 'Email ou senha incorretos.');

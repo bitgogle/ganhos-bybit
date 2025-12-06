@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (profileData?.restricted) {
           await supabase.auth.signOut();
-          throw new Error('Sua conta foi restrita. Entre em contato com o suporte.');
+          throw new Error('Sua conta foi restrita devido a violações. Entre em contato com o suporte para mais informações.');
         }
       }
 

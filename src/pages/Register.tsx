@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 const registerSchema = z.object({
   name: z.string().trim().min(1, 'Nome é obrigatório'),
   surname: z.string().trim().min(1, 'Sobrenome é obrigatório'),
-  email: z.string().email('Email inválido'),
+  email: z.string().trim().email('Email inválido'),
   phone: z.string().refine((val) => {
     const digits = val.replace(/\D/g, '');
     return digits.length === 11;
