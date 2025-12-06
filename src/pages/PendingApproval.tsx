@@ -3,13 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Clock, LogOut, TrendingUp } from 'lucide-react';
 
 const PendingApproval = () => {
-  const { profile, logout } = useApp();
+  const { profile, logout, loading: profileLoading } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Don't redirect while profile is still loading
+    if (profileLoading) return;
+    
     if (!profile) {
       navigate('/login');
     } else if (profile.status === 'active') {
@@ -17,14 +21,17 @@ const PendingApproval = () => {
     } else if (profile.status === 'rejected') {
       navigate('/rejected');
     }
-  }, [profile, navigate]);
+  }, [profile, profileLoading, navigate]);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
-  if (!profile) return null;
+  // Show loading state while profile is being fetched
+  if (profileLoading || !profile) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-primary/5 to-background">

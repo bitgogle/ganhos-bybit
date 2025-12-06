@@ -32,6 +32,7 @@ import {
 import { formatCurrency, formatDate } from '@/lib/format';
 import { Transaction, SystemSettings } from '@/context/AppContext';
 import { WithdrawalFeeDialog } from '@/components/withdrawal/WithdrawalFeeDialog';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { getErrorMessage } from '@/lib/utils';
@@ -355,7 +356,10 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  if (!profile) return null;
+  // Show loading state while profile is being fetched
+  if (profileLoading || !profile) {
+    return <LoadingSpinner message="Carregando painel..." />;
+  }
 
   const pendingTransactions = transactions.filter(t => t.status === 'pending').length;
   const unreadCount = notifications.filter(n => !n.read).length;

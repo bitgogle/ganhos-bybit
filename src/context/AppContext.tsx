@@ -125,21 +125,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         .eq('id', currentSession.user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching profile from Supabase:', error);
+        throw error;
+      }
 
       if (data) {
         // Check role from user_roles table (secure)
-        const { data: roleData } = await supabase
+        const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', currentSession.user.id)
           .single();
+
+        if (roleError) {
+          console.error('Error fetching user role from Supabase:', roleError);
+          // Continue with default 'user' role if role fetch fails
+          // This ensures users can still access the app even if role table has issues
+        }
 
         setProfile({ ...data, role: roleData?.role || 'user' } as Profile);
         setIsAdmin(roleData?.role === 'admin');
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      // Show generic error message as it could be various types of errors
+      toast.error('Erro ao carregar perfil. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -152,15 +163,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [session, fetchProfile]);
 
   useEffect(() => {
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        fetchProfile(session);
-      } else {
+    // Initial session check with error handling
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting Supabase session:', error);
+          toast.error('Erro ao verificar sessão. Tente fazer login novamente.');
+          setLoading(false);
+          return;
+        }
+        
+        setSession(session);
+        if (session) {
+          fetchProfile(session);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Failed to get Supabase session:', error);
+        toast.error('Erro ao iniciar sessão. Recarregue a página.');
         setLoading(false);
       }
-    });
+    };
+    
+    initSession();
 
     // Auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
