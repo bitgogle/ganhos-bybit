@@ -5,20 +5,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TrendingUp, UserPlus } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { z } from 'zod';
 import { getErrorMessage } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const registerSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  surname: z.string().min(1, 'Sobrenome é obrigatório'),
+  name: z.string().trim().min(1, 'Nome é obrigatório'),
+  surname: z.string().trim().min(1, 'Sobrenome é obrigatório'),
   email: z.string().email('Email inválido'),
   phone: z.string().refine((val) => {
     const digits = val.replace(/\D/g, '');
     return digits.length === 11;
   }, 'Telefone deve conter exatamente 11 dígitos'),
-  cpf: z.string().optional().refine((val) => !val || val.replace(/\D/g, '').length === 11, 'CPF deve conter exatamente 11 dígitos'),
+  cpf: z.string().optional().refine((val) => !val || val.trim() === '' || val.replace(/\D/g, '').length === 11, 'CPF deve conter exatamente 11 dígitos'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -39,7 +39,6 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { register: registerUser } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,11 +64,7 @@ const Register = () => {
           }
         });
         setErrors(fieldErrors);
-        toast({
-          variant: 'destructive',
-          title: 'Erro de validação',
-          description: 'Por favor, corrija os campos destacados',
-        });
+        toast.error('Por favor, corrija os campos destacados');
         return;
       }
     }
@@ -86,19 +81,12 @@ const Register = () => {
         cpf: formData.cpf || undefined,
       });
       
-      toast({
-        title: 'Conta criada com sucesso!',
-        description: 'Você já pode fazer login com seu email e senha.',
-      });
+      toast.success('Conta criada com sucesso! Você já pode fazer login com seu email e senha.');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (error: unknown) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: getErrorMessage(error) || 'Ocorreu um erro ao criar sua conta.',
-      });
+      toast.error(getErrorMessage(error) || 'Ocorreu um erro ao criar sua conta.');
     } finally {
       setLoading(false);
     }

@@ -78,8 +78,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (data: RegisterData) => {
     try {
       // Extract only digits from phone and CPF
-      const phoneDigits = data.phone.replace(/\D/g, '');
-      const cpfDigits = data.cpf ? data.cpf.replace(/\D/g, '') : '';
+      const phoneDigits = data.phone.trim().replace(/\D/g, '');
+      const cpfDigits = data.cpf ? data.cpf.trim().replace(/\D/g, '') : '';
 
       // Create full name from name and surname
       const fullName = `${data.name.trim()} ${data.surname.trim()}`;
@@ -99,15 +99,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (authError) throw authError;
 
-      // If user was created, update profile to be active immediately
+      // If user was created, upsert profile to ensure it's active
+      // Using upsert to avoid race conditions with the handle_new_user trigger
       if (authData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ status: 'active' })
-          .eq('id', authData.user.id);
+          .upsert(
+            {
+              id: authData.user.id,
+              status: 'active',
+            },
+            { onConflict: 'id' }
+          );
 
         if (profileError) {
-          console.error('Profile update error:', profileError);
+          console.error('Profile upsert error:', profileError);
         }
       }
 

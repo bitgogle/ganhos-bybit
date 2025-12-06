@@ -5,16 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TrendingUp, Lock } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getErrorMessage } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,20 +23,13 @@ const Login = () => {
     try {
       await login(email, password);
       
-      toast({
-        title: 'Login realizado com sucesso!',
-        description: 'Redirecionando...',
-      });
+      toast.success('Login realizado com sucesso!');
       
       // Navigate to dashboard - it will wait for profile to load before showing content
       // The AppContext auth listener will automatically fetch the profile
       navigate('/dashboard');
     } catch (error: unknown) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro no login',
-        description: getErrorMessage(error) || 'Email ou senha incorretos.',
-      });
+      toast.error(getErrorMessage(error) || 'Email ou senha incorretos.');
     } finally {
       setLoading(false);
     }
