@@ -7,7 +7,7 @@ A cryptocurrency investment platform with an administrative panel. The user inte
 ### User Features (Portuguese Interface)
 
 - **Landing Page** - Attractive landing page with investment plan information
-- **User Registration** - Account creation with administrative approval system
+- **User Registration** - Account creation with immediate access (no email confirmation required)
 - **User Dashboard** - Complete dashboard with:
   - Balance and statistics visualization
   - Investment plans (Starter, Professional, Premium)
@@ -15,9 +15,8 @@ A cryptocurrency investment platform with an administrative panel. The user inte
   - Withdrawal system with configurable fees
   - Complete transaction history
 - **Account States**:
-  - Pending approval
-  - Approved/Active
-  - Rejected
+  - Active (default - immediate access after registration)
+  - Restricted (can be set by admin if needed)
 
 ### Admin Features (English Interface)
 
@@ -120,8 +119,8 @@ If you need to use different credentials:
 | `/login` | User and admin login |
 | `/register` | New user registration |
 | `/dashboard` | User dashboard (requires login) |
-| `/pending-approval` | Approval waiting page |
-| `/rejected` | Registration rejected page |
+| `/pending-approval` | Approval waiting page (legacy - not used by default) |
+| `/rejected` | Registration rejected page (legacy - not used by default) |
 | `/admin` | Admin panel (requires admin login) |
 
 ## Project Structure
@@ -149,15 +148,15 @@ src/
 
 ## User Flow
 
-1. **Registration**: User registers with personal data
-2. **Pending**: Account is pending administrative approval
-3. **Approval**: Admin approves or rejects the registration
-4. **Dashboard**: User accesses dashboard and views plans
-5. **Deposit**: User requests deposit via PIX
-6. **Deposit Approval**: Admin approves the deposit
-7. **Active Investment**: Balance is credited and starts earning
-8. **Withdrawal**: User can request withdrawal at any time
-9. **Processing**: Admin processes and approves the withdrawal
+1. **Registration**: User registers with personal data and gains immediate access
+2. **Dashboard**: User immediately accesses dashboard and views plans (no approval needed)
+3. **Deposit**: User requests deposit via PIX
+4. **Deposit Approval**: Admin approves the deposit
+5. **Active Investment**: Balance is credited and starts earning
+6. **Withdrawal**: User can request withdrawal at any time
+7. **Processing**: Admin processes and approves the withdrawal
+
+**Note**: User accounts are now active immediately upon registration. No email confirmation or admin approval is required for initial access.
 
 ## Deployment to Vercel
 
