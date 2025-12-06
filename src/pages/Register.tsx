@@ -18,7 +18,10 @@ const registerSchema = z.object({
     const digits = val.replace(/\D/g, '');
     return digits.length === 11;
   }, 'Telefone deve conter exatamente 11 dígitos'),
-  cpf: z.string().optional().refine((val) => !val || val.trim() === '' || val.replace(/\D/g, '').length === 11, 'CPF deve conter exatamente 11 dígitos'),
+  cpf: z.string().trim().min(1, 'CPF é obrigatório').refine((val) => {
+    const digits = val.replace(/\D/g, '');
+    return digits.length === 11;
+  }, 'CPF deve conter exatamente 11 dígitos'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -78,7 +81,7 @@ const Register = () => {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        cpf: formData.cpf || undefined,
+        cpf: formData.cpf,
       });
       
       toast.success('Conta criada com sucesso! Você já pode fazer login com seu email e senha.');
@@ -190,13 +193,14 @@ const Register = () => {
               {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cpf">CPF (opcional)</Label>
+              <Label htmlFor="cpf">CPF</Label>
               <Input
                 id="cpf"
                 name="cpf"
                 placeholder="12345678910 ou 123.456.789-10"
                 value={formData.cpf}
                 onChange={handleChange}
+                required
                 className={errors.cpf ? 'border-destructive' : ''}
               />
               {errors.cpf && <p className="text-sm text-destructive">{errors.cpf}</p>}

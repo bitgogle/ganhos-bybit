@@ -21,24 +21,26 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/pending-approval" element={<PendingApproval />} />
-            <Route path="/rejected" element={<Rejected />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/fee-payment/:feeId" element={<FeePayment />} />
-            <Route path="/deposit/:method" element={<DepositDetails />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AppProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/pending-approval" element={<PendingApproval />} />
+              <Route path="/rejected" element={<Rejected />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/fee-payment/:feeId" element={<FeePayment />} />
+              <Route path="/deposit/:method" element={<DepositDetails />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AppProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

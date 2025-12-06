@@ -9,7 +9,7 @@ export interface RegisterData {
   email: string;
   phone: string;
   password: string;
-  cpf?: string;
+  cpf: string;
 }
 
 interface AuthContextType {
@@ -79,12 +79,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // Extract only digits from phone and CPF
       const phoneDigits = data.phone.trim().replace(/\D/g, '');
-      const cpfDigits = data.cpf ? data.cpf.trim().replace(/\D/g, '') : '';
+      const cpfDigits = data.cpf.trim().replace(/\D/g, '');
 
       // Create full name from name and surname
       const fullName = `${data.name.trim()} ${data.surname.trim()}`;
 
       // Register user with Supabase Auth
+      // Note: Email confirmation must be disabled in Supabase settings for instant login
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email.trim(),
         password: data.password,
@@ -92,29 +93,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           data: {
             name: fullName,
             phone: phoneDigits,
-            cpf: cpfDigits || null,
+            cpf: cpfDigits,
           },
+          emailRedirectTo: undefined, // No email confirmation
         },
       });
 
       if (authError) throw authError;
 
-      // If user was created, upsert profile to ensure it's active
-      // Using upsert to avoid race conditions with the handle_new_user trigger
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert(
-            {
-              id: authData.user.id,
-              status: 'active',
-            },
-            { onConflict: 'id' }
-          );
+      // Check if user was actually created (not just returned existing)
+      if (!authData.user) {
+        throw new Error('Falha ao criar usuário. Por favor, tente novamente.');
+      }
 
-        if (profileError) {
-          console.error('Profile upsert error:', profileError);
-        }
+      // Wait a moment for the trigger to create the profile
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Upsert profile to ensure it exists and is active
+      // Using upsert to avoid race conditions with the handle_new_user trigger
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert(
+          {
+            id: authData.user.id,
+            name: fullName,
+            email: data.email.trim(),
+            phone: phoneDigits,
+            cpf: cpfDigits,
+            status: 'active',
+            available_balance: 0,
+            invested_balance: 0,
+            profit_balance: 0,
+          },
+          { onConflict: 'id' }
+        );
+
+      if (profileError) {
+        console.error('Profile upsert error:', profileError);
+        // Don't throw - user is created, they can still login
       }
 
       // Sign out after registration so user can log in fresh
