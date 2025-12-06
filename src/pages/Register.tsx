@@ -18,7 +18,6 @@ const registerSchema = z.object({
     const digits = val.replace(/\D/g, '');
     return digits.length === 11;
   }, 'Telefone deve conter exatamente 11 dígitos'),
-``` @copilot 
   cpf: z.string().trim().min(1, 'CPF é obrigatório').refine((val) => {
     const digits = val.replace(/\D/g, '');
     return digits.length === 11;
