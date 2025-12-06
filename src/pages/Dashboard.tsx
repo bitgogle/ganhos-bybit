@@ -32,6 +32,7 @@ import {
 import { formatCurrency, formatDate } from '@/lib/format';
 import { Transaction, SystemSettings } from '@/context/AppContext';
 import { WithdrawalFeeDialog } from '@/components/withdrawal/WithdrawalFeeDialog';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { getErrorMessage } from '@/lib/utils';
@@ -357,14 +358,7 @@ const Dashboard = () => {
 
   // Show loading state while profile is being fetched
   if (profileLoading || !profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Carregando painel...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Carregando painel..." />;
   }
 
   const pendingTransactions = transactions.filter(t => t.status === 'pending').length;

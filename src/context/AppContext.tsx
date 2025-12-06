@@ -170,7 +170,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         
         if (error) {
           console.error('Error getting Supabase session:', error);
-          toast.error('Erro ao conectar. Tente novamente.');
+          toast.error('Erro ao verificar sessão. Tente fazer login novamente.');
           setLoading(false);
           return;
         }
