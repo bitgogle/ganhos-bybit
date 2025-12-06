@@ -6,9 +6,15 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 // Validate environment variables
-if (!SUPABASE_URL?.trim() || !SUPABASE_PUBLISHABLE_KEY?.trim()) {
+if (!SUPABASE_URL?.trim()) {
   throw new Error(
-    'Missing Supabase environment variables. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are set.'
+    'Missing VITE_SUPABASE_URL environment variable. Please check your .env file.'
+  );
+}
+
+if (!SUPABASE_PUBLISHABLE_KEY?.trim()) {
+  throw new Error(
+    'Missing VITE_SUPABASE_PUBLISHABLE_KEY environment variable. Please check your .env file.'
   );
 }
 
