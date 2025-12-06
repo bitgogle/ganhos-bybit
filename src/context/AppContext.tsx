@@ -183,7 +183,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       } catch (error) {
         console.error('Failed to get Supabase session:', error);
-        toast.error('Erro ao conectar. Tente novamente.');
+        toast.error('Erro ao iniciar sessão. Recarregue a página.');
         setLoading(false);
       }
     };
