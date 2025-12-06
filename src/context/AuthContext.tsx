@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Note: Email confirmation must be disabled in Supabase settings for instant login
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email.trim(),
-        password: data.password,
+        password: data.password.trim(),
         options: {
           data: {
             name: fullName,
