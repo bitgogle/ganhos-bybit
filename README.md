@@ -2,6 +2,24 @@
 
 A cryptocurrency investment platform with an administrative panel. The user interface is in Portuguese (Brazilian), while the admin interface is in English.
 
+## 📚 Complete Documentation
+
+**NEW!** For a comprehensive, all-in-one guide covering everything from setup to deployment, see:
+
+### **[COMPLETE_APP_GUIDE.md](COMPLETE_APP_GUIDE.md)** - Single-File Comprehensive Documentation
+
+This 2,700+ line guide includes:
+- Complete project architecture and technology stack
+- Full database schema with all tables, functions, and triggers
+- Step-by-step build instructions from scratch
+- Three deployment methods (GitHub, CLI, GitHub Actions)
+- Security best practices and RLS policies
+- Testing and troubleshooting procedures
+- Complete code examples
+- Everything needed to build and deploy the app completely
+
+**Perfect for:** New developers, deployment teams, system administrators, or anyone needing complete system understanding.
+
 ## Features
 
 ### User Features (Portuguese Interface)
