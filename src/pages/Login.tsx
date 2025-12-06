@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TrendingUp, Lock } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { getErrorMessage } from '@/lib/utils';
 
@@ -14,7 +14,6 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,11 +26,7 @@ const Login = () => {
       // Navigate to dashboard - user is now logged in
       navigate('/dashboard');
     } catch (error: unknown) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro no login',
-        description: getErrorMessage(error) || 'Email ou senha incorretos.',
-      });
+      toast.error(getErrorMessage(error) || 'Email ou senha incorretos.');
     } finally {
       setLoading(false);
     }

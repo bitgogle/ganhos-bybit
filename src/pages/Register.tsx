@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TrendingUp, UserPlus } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { z } from 'zod';
 import { getErrorMessage } from '@/lib/utils';
@@ -46,7 +46,6 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { register } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,11 +71,7 @@ const Register = () => {
           }
         });
         setErrors(fieldErrors);
-        toast({
-          variant: 'destructive',
-          title: 'Erro de validação',
-          description: 'Por favor, corrija os campos destacados',
-        });
+        toast.error('Por favor, corrija os campos destacados');
         return;
       }
     }
@@ -98,11 +93,7 @@ const Register = () => {
       // Navigate to dashboard immediately
       navigate('/dashboard');
     } catch (error: unknown) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: getErrorMessage(error) || 'Ocorreu um erro ao criar sua conta.',
-      });
+      toast.error(getErrorMessage(error) || 'Ocorreu um erro ao criar sua conta.');
     } finally {
       setLoading(false);
     }
